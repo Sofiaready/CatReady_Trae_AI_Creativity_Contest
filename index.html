@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>猫鉴通 CatReady - All-in-One 养猫平台</title>
+  <style>
+    :root {
+      --primary: #FF8C42;
+      --primary-light: #FFF0E6;
+      --primary-dark: #E67335;
+      --secondary: #FFB347;
+      --bg: #F5F5F5;
+      --card-bg: #FFFFFF;
+      --text: #18191C;
+      --text-secondary: #61666D;
+      --text-light: #9499A0;
+      --border: #E3E5E7;
+      --bili-pink: #FB7299;
+      --green: #00B5E5;
+      --red: #F25D8E;
+      --orange: #FF8C42;
+      --yellow: #FFAA00;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    /* ========== 移动端 ========== */
+    @media (max-width: 1023px) {
+      #app-mobile { display: block; width: 100vw; height: 100vh; overflow: hidden; position: relative; }
+      #app-desktop { display: none; }
+
+      .screen {
+        display: none;
+        width: 100%;
+        height: calc(100vh - 60px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        background: var(--bg);
+      }
+      .screen.active { display: block; }
+      .screen::-webkit-scrollbar { display: none; }
+
+      /* 顶部Tab栏 */
+      .top-tabs {
+        display: flex;
+        gap: 20px;
+        padding: 0 16px;
+        height: 44px;
+        align-items: center;
+        background: var(--card-bg);
+        border-bottom: 1px solid var(--border);
+        overflow-x: auto;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+      }
+      .top-tabs::-webkit-scrollbar { display: none; }
+      .top-tab {
+        font-size: 14px;
+        color: var(--text-secondary);
+        cursor: pointer;
+        position: relative;
+        padding: 4px 0;
+        font-weight: 500;
+      }
+      .top-tab.active {
+        color: var(--primary);
+        font-weight: 700;
+        font-size: 15px;
+      }
+      .top-tab.active::after {
+        content: '';
+        position: absolute;
+        bottom: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 20px;
+        height: 3px;
+        background: var(--primary);
+        border-radius: 2px;
+      }
+
+      /* 底部导航 */
+      .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: var(--card-bg);
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        z-index: 100;
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+      .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        cursor: pointer;
+        color: var(--text-light);
+        font-size: 10px;
+        padding: 4px 12px;
+        transition: color 0.2s;
+      }
+      .nav-item .nav-icon { font-size: 22px; line-height: 1; }
+      .nav-item.active { color: var(--primary); }
+      .nav-item.center-btn {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        color: white;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        padding: 0;
+        margin-top: -10px;
+        box-shadow: 0 4px 12px rgba(255,140,66,0.4);
+      }
+
+      /* 视频/帖子卡片 */
+      .video-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        padding: 8px;
+      }
+      .video-card {
+        background: var(--card-bg);
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+      }
+      .video-cover {
+        aspect-ratio: 16/10;
+        background: linear-gradient(135deg, #FFE8D6 0%, #FFD0B0 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        position: relative;
+      }
+      .video-duration {
+        position: absolute;
+        bottom: 6px;
+        right: 6px;
+        background: rgba(0,0,0,0.6);
+        color: white;
+        font-size: 11px;
+        padding: 1px 6px;
+        border-radius: 4px;
+      }
+      .video-info { padding: 8px; }
+      .video-title {
+        font-size: 13px;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-bottom: 6px;
+      }
+      .video-meta {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        color: var(--text-light);
+      }
+      .video-meta .up-avatar {
+        width: 16px; height: 16px;
+        border-radius: 50%;
+        background: var(--primary-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+      }
+
+      /* 单列内容流 */
+      .content-list { padding: 8px; }
+      .content-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        margin-bottom: 8px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+      }
+      .content-cover {
+        width: 100%;
+        aspect-ratio: 16/9;
+        background: linear-gradient(135deg, #FFE8D6 0%, #FFD0B0 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        position: relative;
+      }
+      .content-body { padding: 12px; }
+      .content-title { font-size: 15px; font-weight: 600; margin-bottom: 8px; line-height: 1.4; }
+      .content-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 10px; }
+      .content-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        color: var(--text-light);
+      }
+      .content-author {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .content-author-avatar {
+        width: 24px; height: 24px;
+        border-radius: 50%;
+        background: var(--primary-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+      }
+      .content-stats { display: flex; gap: 12px; }
+      .content-stats span { display: flex; align-items: center; gap: 3px; }
+
+      /* AI顾问 */
+      .ai-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        padding: 24px 20px;
+        color: white;
+        text-align: center;
+      }
+      .ai-avatar {
+        width: 64px; height: 64px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        margin: 0 auto 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        border: 3px solid rgba(255,255,255,0.3);
+      }
+      .ai-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+      .ai-desc { font-size: 13px; opacity: 0.9; }
+      .ai-chat {
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .ai-bubble {
+        max-width: 85%;
+        padding: 12px 14px;
+        border-radius: 16px;
+        font-size: 14px;
+        line-height: 1.5;
+        word-wrap: break-word;
+      }
+      .ai-bubble.user {
+        align-self: flex-end;
+        background: var(--primary);
+        color: white;
+        border-bottom-right-radius: 4px;
+      }
+      .ai-bubble.bot {
+        align-self: flex-start;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-bottom-left-radius: 4px;
+      }
+      .ai-bubble.bot strong { color: var(--primary); }
+      .ai-input-area {
+        position: fixed;
+        bottom: 60px;
+        left: 0; right: 0;
+        padding: 10px 16px;
+        background: var(--card-bg);
+        border-top: 1px solid var(--border);
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        z-index: 60;
+      }
+      .ai-input {
+        flex: 1;
+        padding: 10px 14px;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        font-size: 14px;
+        outline: none;
+        background: var(--bg);
+      }
+      .ai-send {
+        width: 40px; height: 40px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        cursor: pointer;
+      }
+
+      /* 费用详情 */
+      .cost-section { padding: 16px; }
+      .cost-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 12px;
+        border: 1px solid var(--border);
+      }
+      .cost-card-title {
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .cost-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .cost-row:last-child { border-bottom: none; }
+      .cost-item-name { font-size: 14px; display: flex; align-items: center; gap: 8px; }
+      .cost-item-price { font-size: 14px; font-weight: 600; color: var(--red); }
+      .cost-progress {
+        height: 6px;
+        background: var(--bg);
+        border-radius: 3px;
+        margin-top: 6px;
+        overflow: hidden;
+      }
+      .cost-progress-bar {
+        height: 100%;
+        border-radius: 3px;
+        background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+      }
+      .cost-total {
+        background: linear-gradient(135deg, var(--primary-light) 0%, #FFF5EE 100%);
+        border: 1px solid var(--primary);
+      }
+      .cost-total .cost-item-price { font-size: 18px; color: var(--primary); }
+
+      /* 动态页 */
+      .moment-card {
+        background: var(--card-bg);
+        padding: 16px;
+        border-bottom: 1px solid var(--border);
+      }
+      .moment-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .moment-avatar {
+        width: 40px; height: 40px;
+        border-radius: 50%;
+        background: var(--primary-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+      }
+      .moment-user { font-weight: 600; font-size: 14px; }
+      .moment-time { font-size: 12px; color: var(--text-light); }
+      .moment-content { font-size: 14px; line-height: 1.6; margin-bottom: 10px; }
+      .moment-media {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+        margin-bottom: 10px;
+      }
+      .moment-media-item {
+        aspect-ratio: 1;
+        background: var(--primary-light);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+      }
+      .moment-actions {
+        display: flex;
+        gap: 20px;
+        font-size: 13px;
+        color: var(--text-light);
+      }
+      .moment-actions span { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+
+      /* 消息页 */
+      .msg-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        background: var(--card-bg);
+        border-bottom: 1px solid var(--border);
+        cursor: pointer;
+      }
+      .msg-avatar {
+        width: 48px; height: 48px;
+        border-radius: 50%;
+        background: var(--primary-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        position: relative;
+      }
+      .msg-badge {
+        position: absolute;
+        top: -2px; right: -2px;
+        width: 18px; height: 18px;
+        background: var(--red);
+        color: white;
+        font-size: 11px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid white;
+      }
+      .msg-content { flex: 1; }
+      .msg-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+      .msg-preview { font-size: 13px; color: var(--text-light); }
+      .msg-time { font-size: 12px; color: var(--text-light); }
+
+      /* 个人中心 */
+      .profile-header-m {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        padding: 30px 20px 20px;
+        color: white;
+        position: relative;
+      }
+      .profile-top {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+      .profile-avatar-m {
+        width: 70px; height: 70px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        border: 3px solid rgba(255,255,255,0.3);
+      }
+      .profile-name-m { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+      .profile-id-m { font-size: 12px; opacity: 0.8; }
+      .profile-stats-m {
+        display: flex;
+        justify-content: space-around;
+        text-align: center;
+      }
+      .profile-stat-m .num { font-size: 18px; font-weight: 700; }
+      .profile-stat-m .label { font-size: 12px; opacity: 0.9; margin-top: 2px; }
+      .profile-menu {
+        background: var(--card-bg);
+        margin: 12px;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--border);
+        cursor: pointer;
+      }
+      .menu-item:last-child { border-bottom: none; }
+      .menu-icon { font-size: 22px; width: 30px; text-align: center; }
+      .menu-text { flex: 1; font-size: 14px; }
+      .menu-arrow { color: var(--text-light); font-size: 18px; }
+
+      /* 通用 */
+      .section-header {
+        padding: 16px 16px 8px;
+        font-size: 16px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+    }
+
+    /* ========== 桌面端 ========== */
+    @media (min-width: 1024px) {
+      #app-mobile { display: none; }
+      #app-desktop { display: flex; width: 100vw; height: 100vh; overflow: hidden; }
+
+      /* 左侧边栏 */
+      .sidebar {
+        width: 220px;
+        background: var(--card-bg);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        padding: 20px 0;
+      }
+      .sidebar-logo {
+        padding: 0 20px 20px;
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .sidebar-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 20px;
+        margin: 2px 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        color: var(--text-secondary);
+        transition: all 0.2s;
+      }
+      .sidebar-item:hover { background: var(--bg); }
+      .sidebar-item.active {
+        background: var(--primary-light);
+        color: var(--primary);
+        font-weight: 600;
+      }
+      .sidebar-item .icon { font-size: 20px; width: 24px; text-align: center; }
+
+      /* 中间内容区 */
+      .main-content {
+        flex: 1;
+        overflow-y: auto;
+        background: var(--bg);
+        padding: 20px 40px;
+      }
+      .main-content::-webkit-scrollbar { width: 6px; }
+      .main-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+      /* 顶部搜索栏 */
+      .desktop-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 24px;
+      }
+      .search-box {
+        flex: 1;
+        max-width: 400px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--card-bg);
+        font-size: 14px;
+        outline: none;
+      }
+      .search-box:focus { border-color: var(--primary); }
+      .header-tabs {
+        display: flex;
+        gap: 24px;
+      }
+      .header-tab {
+        font-size: 15px;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding-bottom: 4px;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s;
+      }
+      .header-tab.active {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+        font-weight: 600;
+      }
+
+      /* 桌面端视频网格 */
+      .desktop-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+      }
+      .desktop-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 1px solid var(--border);
+      }
+      .desktop-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      }
+      .desktop-cover {
+        aspect-ratio: 16/9;
+        background: linear-gradient(135deg, #FFE8D6 0%, #FFD0B0 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        position: relative;
+      }
+      .desktop-cover .duration {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        background: rgba(0,0,0,0.6);
+        color: white;
+        font-size: 12px;
+        padding: 2px 8px;
+        border-radius: 4px;
+      }
+      .desktop-info { padding: 14px; }
+      .desktop-title { font-size: 15px; font-weight: 600; margin-bottom: 10px; line-height: 1.4; }
+      .desktop-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 13px;
+        color: var(--text-light);
+      }
+      .desktop-author {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .desktop-author-avatar {
+        width: 22px; height: 22px;
+        border-radius: 50%;
+        background: var(--primary-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+      }
+
+      /* 右侧边栏 */
+      .rightbar {
+        width: 300px;
+        background: var(--card-bg);
+        border-left: 1px solid var(--border);
+        padding: 20px;
+        overflow-y: auto;
+      }
+      .rightbar-title {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 16px;
+      }
+      .hot-item {
+        display: flex;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+        cursor: pointer;
+      }
+      .hot-rank {
+        width: 20px;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text-light);
+        flex-shrink: 0;
+      }
+      .hot-rank.top { color: var(--red); }
+      .hot-text { flex: 1; }
+      .hot-title { font-size: 14px; margin-bottom: 2px; }
+      .hot-heat { font-size: 12px; color: var(--text-light); }
+
+      /* 桌面端AI顾问 */
+      .desktop-ai-container {
+        display: flex;
+        gap: 20px;
+        height: calc(100vh - 100px);
+      }
+      .desktop-ai-chat {
+        flex: 1;
+        background: var(--card-bg);
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .desktop-ai-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .desktop-ai-avatar {
+        width: 40px; height: 40px;
+        border-radius: 50%;
+        background: var(--primary-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+      }
+      .desktop-ai-title { font-weight: 700; }
+      .desktop-ai-subtitle { font-size: 13px; color: var(--text-light); }
+      .desktop-ai-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .desktop-ai-input {
+        padding: 16px 20px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        gap: 12px;
+      }
+      .desktop-ai-input input {
+        flex: 1;
+        padding: 10px 16px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        font-size: 14px;
+        outline: none;
+      }
+      .desktop-ai-input button {
+        padding: 10px 20px;
+        border-radius: 8px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      .desktop-ai-sidebar {
+        width: 280px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .desktop-ai-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 16px;
+        border: 1px solid var(--border);
+      }
+      .desktop-ai-card h4 {
+        font-size: 14px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .desktop-ai-card p {
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.6;
+      }
+      .desktop-ai-card .tag {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 6px;
+        background: var(--primary-light);
+        color: var(--primary);
+        font-size: 12px;
+        margin: 4px 4px 0 0;
+      }
+
+      /* 桌面端费用分析 */
+      .cost-desktop-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-bottom: 24px;
+      }
+      .cost-desktop-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid var(--border);
+      }
+      .cost-desktop-card h4 {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+      }
+      .cost-desktop-card .amount {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--primary);
+      }
+      .cost-desktop-card .amount.red { color: var(--red); }
+      .cost-desktop-card .amount.green { color: var(--green); }
+      .cost-desktop-detail {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 24px;
+        border: 1px solid var(--border);
+      }
+      .cost-desktop-detail h3 {
+        font-size: 16px;
+        margin-bottom: 16px;
+      }
+      .cost-d-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 14px;
+      }
+      .cost-d-row:last-child { border-bottom: none; }
+      .cost-d-label { color: var(--text-secondary); }
+      .cost-d-value { font-weight: 600; }
+      .cost-d-bar-wrap {
+        height: 8px;
+        background: var(--bg);
+        border-radius: 4px;
+        margin-top: 6px;
+        overflow: hidden;
+      }
+      .cost-d-bar {
+        height: 100%;
+        border-radius: 4px;
+        background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+      }
+    }
+
+    /* 通用动画 */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in { animation: fadeIn 0.3s ease; }
+
+    /* 页面切换 */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* 桌面端页面容器 */
+    .desktop-page { display: none; }
+    .desktop-page.active { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- ========== 移动端 ========== -->
+<div id="app-mobile">
+  <!-- 首页 -->
+  <div class="screen active" id="m-screen-home">
+    <div class="top-tabs">
+      <div class="top-tab active" data-tab="recommend">推荐</div>
+      <div class="top-tab" data-tab="hot">热门</div>
+      <div class="top-tab" data-tab="knowledge">养猫知识</div>
+      <div class="top-tab" data-tab="adopt">领养专区</div>
+      <div class="top-tab" data-tab="community">社区</div>
+    </div>
+    <div id="m-home-content"></div>
+  </div>
+
+  <!-- 动态 -->
+  <div class="screen" id="m-screen-moment">
+    <div class="top-tabs" style="justify-content:center;">
+      <div class="top-tab active">关注</div>
+      <div class="top-tab">综合</div>
+    </div>
+    <div id="m-moment-content"></div>
+  </div>
+
+  <!-- AI顾问 -->
+  <div class="screen" id="m-screen-ai" style="background:white;">
+    <div class="ai-header">
+      <div class="ai-avatar">🤖</div>
+      <div class="ai-name">AI养猫顾问</div>
+      <div class="ai-desc">输入你的预算和生活情况，我帮你算清养猫账</div>
+    </div>
+    <div class="ai-chat" id="m-ai-chat" style="padding-bottom:80px;">
+      <div class="ai-bubble bot">
+        你好！我是你的 AI 养猫顾问 🐱<br><br>
+        我可以帮你：<br>
+        • 根据预算制定养猫方案<br>
+        • 详细拆解每月开销明细<br>
+        • 评估你是否准备好养猫<br>
+        • 推荐适合你的猫咪品种<br><br>
+        试试告诉我："我每月预算500元，住在公寓，工作日白天不在家"
+      </div>
+    </div>
+    <div class="ai-input-area">
+      <input type="text" class="ai-input" id="m-ai-input" placeholder="描述你的情况...">
+      <button class="ai-send" id="m-ai-send">➤</button>
+    </div>
+  </div>
+
+  <!-- 消息 -->
+  <div class="screen" id="m-screen-msg">
+    <div class="section-header" style="background:white;border-bottom:1px solid var(--border);padding:16px;">消息</div>
+    <div id="m-msg-content"></div>
+  </div>
+
+  <!-- 我的 -->
+  <div class="screen" id="m-screen-profile">
+    <div class="profile-header-m">
+      <div class="profile-top">
+        <div class="profile-avatar-m">🐱</div>
+        <div>
+          <div class="profile-name-m">准铲屎官小明</div>
+          <div class="profile-id-m">ID: catready_2026</div>
+        </div>
+      </div>
+      <div class="profile-stats-m">
+        <div class="profile-stat-m"><div class="num">12</div><div class="label">动态</div></div>
+        <div class="profile-stat-m"><div class="num">328</div><div class="label">粉丝</div></div>
+        <div class="profile-stat-m"><div class="num">156</div><div class="label">关注</div></div>
+        <div class="profile-stat-m"><div class="num">89</div><div class="label">获赞</div></div>
+      </div>
+    </div>
+    <div class="profile-menu">
+      <div class="menu-item"><span class="menu-icon">📋</span><span class="menu-text">我的猫咪档案</span><span class="menu-arrow">›</span></div>
+      <div class="menu-item"><span class="menu-icon">💰</span><span class="menu-text">养猫预算分析</span><span class="menu-arrow">›</span></div>
+      <div class="menu-item"><span class="menu-icon">🏪</span><span class="menu-text">收藏的店铺</span><span class="menu-arrow">›</span></div>
+      <div class="menu-item"><span class="menu-icon">⭐</span><span class="menu-text">收藏的帖子</span><span class="menu-arrow">›</span></div>
+    </div>
+    <div class="profile-menu">
+      <div class="menu-item"><span class="menu-icon">⚙️</span><span class="menu-text">设置</span><span class="menu-arrow">›</span></div>
+      <div class="menu-item"><span class="menu-icon">❓</span><span class="menu-text">帮助与反馈</span><span class="menu-arrow">›</span></div>
+    </div>
+  </div>
+
+  <!-- 底部导航 -->
+  <div class="bottom-nav">
+    <div class="nav-item active" data-screen="home">
+      <span class="nav-icon">🏠</span>
+      <span>首页</span>
+    </div>
+    <div class="nav-item" data-screen="moment">
+      <span class="nav-icon">⚡</span>
+      <span>动态</span>
+    </div>
+    <div class="nav-item center-btn" data-screen="ai">
+      <span>🐱</span>
+    </div>
+    <div class="nav-item" data-screen="msg">
+      <span class="nav-icon">💬</span>
+      <span>消息</span>
+    </div>
+    <div class="nav-item" data-screen="profile">
+      <span class="nav-icon">👤</span>
+      <span>我的</span>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 桌面端 ========== -->
+<div id="app-desktop">
+  <!-- 左侧边栏 -->
+  <div class="sidebar">
+    <div class="sidebar-logo">🐱 猫鉴通</div>
+    <div class="sidebar-item active" data-page="home"><span class="icon">🏠</span> 首页</div>
+    <div class="sidebar-item" data-page="moment"><span class="icon">⚡</span> 动态</div>
+    <div class="sidebar-item" data-page="ai"><span class="icon">🤖</span> AI顾问</div>
+    <div class="sidebar-item" data-page="msg"><span class="icon">💬</span> 消息</div>
+    <div class="sidebar-item" data-page="profile"><span class="icon">👤</span> 我的</div>
+  </div>
+
+  <!-- 中间内容区 -->
+  <div class="main-content">
+    <!-- 首页 -->
+    <div class="desktop-page active" id="d-page-home">
+      <div class="desktop-header">
+        <input type="text" class="search-box" placeholder="搜索养猫知识、视频、帖子...">
+        <div class="header-tabs">
+          <div class="header-tab active">推荐</div>
+          <div class="header-tab">热门</div>
+          <div class="header-tab">养猫知识</div>
+          <div class="header-tab">领养专区</div>
+        </div>
+      </div>
+      <div class="desktop-grid" id="d-home-grid"></div>
+    </div>
+
+    <!-- 动态 -->
+    <div class="desktop-page" id="d-page-moment">
+      <div class="desktop-header">
+        <h2 style="font-size:20px;">动态</h2>
+      </div>
+      <div id="d-moment-list"></div>
+    </div>
+
+    <!-- AI顾问 -->
+    <div class="desktop-page" id="d-page-ai">
+      <div class="desktop-ai-container">
+        <div class="desktop-ai-chat">
+          <div class="desktop-ai-header">
+            <div class="desktop-ai-avatar">🤖</div>
+            <div>
+              <div class="desktop-ai-title">AI养猫顾问</div>
+              <div class="desktop-ai-subtitle">基于你的预算和生活情况，智能推荐养猫方案</div>
+            </div>
+          </div>
+          <div class="desktop-ai-messages" id="d-ai-messages">
+            <div class="ai-bubble bot" style="max-width:80%;">
+              你好！我是你的 AI 养猫顾问 🐱<br><br>
+              我可以帮你：<br>
+              • 根据预算制定养猫方案<br>
+              • 详细拆解每月开销明细<br>
+              • 评估你是否准备好养猫<br>
+              • 推荐适合你的猫咪品种<br><br>
+              试试告诉我："我每月预算500元，住在公寓，工作日白天不在家"
+            </div>
+          </div>
+          <div class="desktop-ai-input">
+            <input type="text" id="d-ai-input" placeholder="描述你的情况...">
+            <button id="d-ai-send">发送</button>
+          </div>
+        </div>
+        <div class="desktop-ai-sidebar">
+          <div class="desktop-ai-card">
+            <h4>💡 你可以这样问</h4>
+            <span class="tag">预算500够养猫吗</span>
+            <span class="tag">新手推荐什么品种</span>
+            <span class="tag">养猫必备清单</span>
+            <span class="tag">每月开销明细</span>
+            <span class="tag">公寓养猫注意事项</span>
+          </div>
+          <div class="desktop-ai-card">
+            <h4>📊 养猫平均月开销</h4>
+            <p>经济型：200-400元<br>标准型：400-800元<br>精致型：800-1500元<br><br>具体取决于猫粮档次、品种和医疗支出。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 消息 -->
+    <div class="desktop-page" id="d-page-msg">
+      <div class="desktop-header"><h2 style="font-size:20px;">消息</h2></div>
+      <div style="background:white;border-radius:12px;border:1px solid var(--border);" id="d-msg-list"></div>
+    </div>
+
+    <!-- 我的 -->
+    <div class="desktop-page" id="d-page-profile">
+      <div style="background:linear-gradient(135deg,var(--primary) 0%,var(--secondary) 100%);border-radius:12px;padding:30px;color:white;margin-bottom:20px;display:flex;align-items:center;gap:20px;">
+        <div style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:40px;border:3px solid rgba(255,255,255,0.3);">🐱</div>
+        <div>
+          <div style="font-size:22px;font-weight:700;margin-bottom:4px;">准铲屎官小明</div>
+          <div style="font-size:13px;opacity:0.9;">ID: catready_2026 · 已准备养猫 15 天</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;">
+        <div style="background:white;border-radius:12px;padding:20px;text-align:center;border:1px solid var(--border);">
+          <div style="font-size:24px;font-weight:700;color:var(--primary);">12</div>
+          <div style="font-size:13px;color:var(--text-light);margin-top:4px;">动态</div>
+        </div>
+        <div style="background:white;border-radius:12px;padding:20px;text-align:center;border:1px solid var(--border);">
+          <div style="font-size:24px;font-weight:700;color:var(--primary);">328</div>
+          <div style="font-size:13px;color:var(--text-light);margin-top:4px;">粉丝</div>
+        </div>
+        <div style="background:white;border-radius:12px;padding:20px;text-align:center;border:1px solid var(--border);">
+          <div style="font-size:24px;font-weight:700;color:var(--primary);">156</div>
+          <div style="font-size:13px;color:var(--text-light);margin-top:4px;">关注</div>
+        </div>
+        <div style="background:white;border-radius:12px;padding:20px;text-align:center;border:1px solid var(--border);">
+          <div style="font-size:24px;font-weight:700;color:var(--primary);">89</div>
+          <div style="font-size:13px;color:var(--text-light);margin-top:4px;">获赞</div>
+        </div>
+      </div>
+      <div style="background:white;border-radius:12px;border:1px solid var(--border);overflow:hidden;">
+        <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer;"><span style="font-size:20px;">📋</span><span style="flex:1;">我的猫咪档案</span><span style="color:var(--text-light);">›</span></div>
+        <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer;"><span style="font-size:20px;">💰</span><span style="flex:1;">养猫预算分析</span><span style="color:var(--text-light);">›</span></div>
+        <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer;"><span style="font-size:20px;">🏪</span><span style="flex:1;">收藏的店铺</span><span style="color:var(--text-light);">›</span></div>
+        <div style="padding:16px 20px;display:flex;align-items:center;gap:12px;cursor:pointer;"><span style="font-size:20px;">⭐</span><span style="flex:1;">收藏的帖子</span><span style="color:var(--text-light);">›</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右侧边栏 -->
+  <div class="rightbar">
+    <div class="rightbar-title">🔥 热门榜单</div>
+    <div id="d-hot-list"></div>
+  </div>
+</div>
+
+<script>
+// ========== 数据 ==========
+const videos = [
+  { id:1, title:'新手养猫第一周必看！这5件事做错会后悔', up:'猫咪科普君', avatar:'🧑‍🔬', views:'12.5万', duration:'08:32', cover:'🎥' },
+  { id:2, title:'橘猫一个月吃多少钱？真实养猫开销记录', up:'铲屎官日记', avatar:'😺', views:'8.3万', duration:'05:17', cover:'💰' },
+  { id:3, title:'2026年最新猫粮测评，这3款性价比最高', up:'宠物营养师', avatar:'🥣', views:'23万', duration:'12:45', cover:'🍖' },
+  { id:4, title:'流浪猫领养全流程，从申请到接回家', up:'流浪猫救助站', avatar:'🏠', views:'5.6万', duration:'15:20', cover:'🏡' },
+  { id:5, title:'布偶猫养护指南：毛发、肠胃、泪痕全攻略', up:'布偶猫舍', avatar:'🧶', views:'18万', duration:'10:08', cover:'✨' },
+  { id:6, title:'猫三联疫苗接种时间表，别被宠物医院坑了', up:'兽医老王', avatar:'💉', views:'31万', duration:'06:55', cover:'💊' },
+];
+
+const posts = [
+  { id:1, title:'养猫一年真实账单：我花了多少钱？', desc:'从猫粮、猫砂到医疗，每一笔都记录下来，给想养猫的朋友一个参考...', author:'记账铲屎官', avatar:'📊', likes:2341, comments:567, cover:'📈' },
+  { id:2, title:' apartment养猫必看：空间小怎么让猫开心', desc:'分享我在30平公寓养猫的10个改造技巧，猫咪活动空间翻倍...', author:'小户型养猫', avatar:'🏠', likes:1892, comments:345, cover:'🛋️' },
+  { id:3, title:'领养代替购买！这5只猫咪正在找家', desc:'都是救助的流浪猫，已驱虫疫苗，性格温顺，限本地领养...', author:'救助站小王', avatar:'❤️', likes:4521, comments:892, cover:'🐈' },
+];
+
+const moments = [
+  { id:1, user:'喵星人日记', avatar:'😺', time:'10分钟前', content:'今天带主子去体检，医生说要控制体重了 😂 大家有什么减肥猫粮推荐吗？', media:['🐱','⚖️'], likes:128, comments:45 },
+  { id:2, user:'布偶猫铲屎官', avatar:'🧶', time:'30分钟前', content:'新到的猫爬架，主子很喜欢！终于不用抓沙发了', media:['🎪'], likes:256, comments:67 },
+  { id:3, user:'流浪猫救助站', avatar:'🏠', time:'1小时前', content:'【领养喜报】小橘找到了新家！感谢各位的关注和转发 ❤️', media:['🎉','🏡','🐱'], likes:892, comments:234 },
+  { id:4, user:'猫咪营养师', avatar:'🥣', time:'2小时前', content:'科普：猫咪绝对不能吃的10种食物！巧克力、洋葱、葡萄都在列，收藏保命', media:['🚫','🍫','🍇'], likes:3421, comments:567 },
+];
+
+const messages = [
+  { id:1, title:'系统通知', preview:'你的帖子《新手养猫指南》已获得1000赞！', time:'10:30', badge:3, avatar:'🔔' },
+  { id:2, title:'猫咪营养师', preview:'感谢关注！有问题随时问我~', time:'昨天', badge:1, avatar:'🥣' },
+  { id:3, title:'流浪猫救助站', preview:'领养申请表已收到，我们会尽快审核', time:'昨天', badge:0, avatar:'🏠' },
+  { id:4, title:'铲屎官交流群', preview:'小明：大家推荐什么猫砂？', time:'前天', badge:12, avatar:'👥' },
+];
+
+const hotList = [
+  { rank:1, title:'新手养猫必备清单', heat:'234万热度' },
+  { rank:2, title:'2026猫粮红黑榜', heat:'189万热度' },
+  { rank:3, title:'猫咪驱虫全攻略', heat:'156万热度' },
+  { rank:4, title:' apartment养猫改造', heat:'132万热度' },
+  { rank:5, title:'领养 vs 购买，怎么选', heat:'98万热度' },
+  { rank:6, title:'猫咪绝育注意事项', heat:'87万热度' },
+  { rank:7, title:'多猫家庭相处指南', heat:'76万热度' },
+  { rank:8, title:'猫咪托运全流程', heat:'65万热度' },
+];
+
+// AI回复逻辑
+const aiResponses = {
+  '预算': `根据你的预算，我来帮你详细分析一下养猫的日常开销：
+
+<strong>📊 每月固定开销（标准模式）</strong>
+• 猫粮：150-250元（占35%）
+• 猫砂：50-80元（占15%）
+• 驱虫：40-60元（占10%）
+• 零食/玩具：60-100元（占15%）
+• 医疗储备金：100-150元（占25%）
+
+<strong>💡 建议</strong>
+如果预算在500元左右，建议选择标准模式，优先保证猫粮质量和定期驱虫，医疗储备非常重要，可以避免突发疾病时的经济压力。`,
+
+  '公寓': `公寓养猫需要特别注意以下几点：
+
+<strong>🏠 空间利用</strong>
+• 垂直空间：安装猫爬架、墙面跳台
+• 隐藏空间：床底、柜顶都是猫咪喜欢的地方
+• 窗边观景台：猫咪最爱看窗外
+
+<strong>⚠️ 安全隐患</strong>
+• 封窗！封窗！封窗！重要的事情说三遍
+• 收好电线，防止啃咬
+• 确认植物无毒（百合、绿萝对猫有毒）
+
+<strong>🎭 白天不在家</strong>
+• 准备自动喂食器和饮水机
+• 留出足够的玩具和抓板
+• 考虑养两只互相陪伴`,
+
+  '品种': `根据你的情况，我推荐以下品种：
+
+<strong>🥇 英短/美短</strong>
+• 性格温顺，适应力强
+• 短毛好打理，掉毛相对较少
+• 适合新手，医疗费用较低
+
+<strong>🥈 中华田园猫（橘猫/狸花）</strong>
+• 体质好，抗病力强
+• 领养代替购买，成本低
+• 智商高，互动性强
+
+<strong>🥉 布偶猫</strong>
+• 性格超温柔，适合室内
+• 但要注意肠胃较敏感
+• 长毛需要每天梳毛`,
+
+  'default': `我来为你详细分析养猫的日常开销构成：
+
+<strong>🍖 1. 饮食开销（最大头，占35-40%）</strong>
+• 主粮：干粮约100-200元/月，湿粮额外100-300元/月
+• 品牌差异大：国产粮80-150元，进口粮200-400元
+• 零食/罐头：50-100元/月
+
+<strong>🧹 2. 日常用品（占15-20%）</strong>
+• 猫砂：膨润土30-50元，豆腐砂50-80元，混合砂40-60元
+• 清洁用品：除臭剂、湿巾等约20-30元/月
+
+<strong>💊 3. 医疗保健（不可忽视，占20-30%）</strong>
+• 疫苗：首年300-500元，之后每年200-300元
+• 驱虫：体内+体外，月均40-80元
+• 体检：每年200-500元
+• 建议预留医疗储备金100-200元/月
+
+<strong>🎾 4. 娱乐玩具（占5-10%）</strong>
+• 猫抓板、逗猫棒等：月均30-60元
+• 猫爬架等耐用品：一次性200-800元
+
+<strong>📋 总计</strong>
+• 经济型：300-500元/月
+• 标准型：500-800元/月
+• 精致型：800-1500元/月`
+};
+
+// ========== 移动端渲染 ==========
+function renderMobileHome(tab) {
+  const container = document.getElementById('m-home-content');
+  if (tab === 'recommend' || tab === 'hot') {
+    container.innerHTML = '<div class="video-grid">' + videos.map(v => `
+      <div class="video-card">
+        <div class="video-cover">${v.cover}<span class="video-duration">${v.duration}</span></div>
+        <div class="video-info">
+          <div class="video-title">${v.title}</div>
+          <div class="video-meta">
+            <span class="up-avatar">${v.avatar}</span>
+            <span>${v.up}</span>
+            <span style="margin-left:auto;">▶ ${v.views}</span>
+          </div>
+        </div>
+      </div>
+    `).join('') + '</div>';
+  } else if (tab === 'knowledge' || tab === 'adopt' || tab === 'community') {
+    container.innerHTML = '<div class="content-list">' + posts.map(p => `
+      <div class="content-card">
+        <div class="content-cover">${p.cover}</div>
+        <div class="content-body">
+          <div class="content-title">${p.title}</div>
+          <div class="content-desc">${p.desc}</div>
+          <div class="content-footer">
+            <div class="content-author">
+              <div class="content-author-avatar">${p.avatar}</div>
+              <span>${p.author}</span>
+            </div>
+            <div class="content-stats">
+              <span>👍 ${p.likes}</span>
+              <span>💬 ${p.comments}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `).join('') + '</div>';
+  }
+}
+
+function renderMobileMoment() {
+  document.getElementById('m-moment-content').innerHTML = moments.map(m => `
+    <div class="moment-card">
+      <div class="moment-header">
+        <div class="moment-avatar">${m.avatar}</div>
+        <div>
+          <div class="moment-user">${m.user}</div>
+          <div class="moment-time">${m.time}</div>
+        </div>
+      </div>
+      <div class="moment-content">${m.content}</div>
+      <div class="moment-media">${m.media.map(i => `<div class="moment-media-item">${i}</div>`).join('')}</div>
+      <div class="moment-actions">
+        <span>👍 ${m.likes}</span>
+        <span>💬 ${m.comments}</span>
+        <span>📤 转发</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderMobileMsg() {
+  document.getElementById('m-msg-content').innerHTML = messages.map(m => `
+    <div class="msg-item">
+      <div class="msg-avatar">${m.avatar}${m.badge > 0 ? `<div class="msg-badge">${m.badge}</div>` : ''}</div>
+      <div class="msg-content">
+        <div class="msg-title">${m.title}</div>
+        <div class="msg-preview">${m.preview}</div>
+      </div>
+      <div class="msg-time">${m.time}</div>
+    </div>
+  `).join('');
+}
+
+// ========== 桌面端渲染 ==========
+function renderDesktopHome() {
+  document.getElementById('d-home-grid').innerHTML = videos.map(v => `
+    <div class="desktop-card">
+      <div class="desktop-cover">${v.cover}<span class="duration">${v.duration}</span></div>
+      <div class="desktop-info">
+        <div class="desktop-title">${v.title}</div>
+        <div class="desktop-meta">
+          <div class="desktop-author">
+            <div class="desktop-author-avatar">${v.avatar}</div>
+            <span>${v.up}</span>
+          </div>
+          <span>▶ ${v.views}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderDesktopMoment() {
+  document.getElementById('d-moment-list').innerHTML = moments.map(m => `
+    <div style="background:white;border-radius:12px;padding:20px;margin-bottom:16px;border:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <div style="width:44px;height:44px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:20px;">${m.avatar}</div>
+        <div>
+          <div style="font-weight:600;font-size:15px;">${m.user}</div>
+          <div style="font-size:13px;color:var(--text-light);">${m.time}</div>
+        </div>
+      </div>
+      <div style="font-size:15px;line-height:1.6;margin-bottom:12px;">${m.content}</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">${m.media.map(i => `<div style="width:120px;height:120px;background:var(--primary-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px;">${i}</div>`).join('')}</div>
+      <div style="display:flex;gap:20px;font-size:13px;color:var(--text-light);">
+        <span>👍 ${m.likes}</span>
+        <span>💬 ${m.comments}</span>
+        <span>📤 转发</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderDesktopMsg() {
+  document.getElementById('d-msg-list').innerHTML = messages.map(m => `
+    <div style="display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);cursor:pointer;">
+      <div style="width:48px;height:48px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:22px;position:relative;">${m.avatar}${m.badge > 0 ? `<div style="position:absolute;top:-2px;right:-2px;width:18px;height:18px;background:var(--red);color:white;font-size:11px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid white;">${m.badge}</div>` : ''}</div>
+      <div style="flex:1;">
+        <div style="font-weight:600;font-size:14px;margin-bottom:4px;">${m.title}</div>
+        <div style="font-size:13px;color:var(--text-light);">${m.preview}</div>
+      </div>
+      <div style="font-size:12px;color:var(--text-light);">${m.time}</div>
+    </div>
+  `).join('');
+}
+
+function renderDesktopHot() {
+  document.getElementById('d-hot-list').innerHTML = hotList.map(h => `
+    <div class="hot-item">
+      <div class="hot-rank ${h.rank <= 3 ? 'top' : ''}">${h.rank}</div>
+      <div class="hot-text">
+        <div class="hot-title">${h.title}</div>
+        <div class="hot-heat">${h.heat}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ========== AI交互 ==========
+function getAIResponse(input) {
+  input = input.toLowerCase();
+  if (input.includes('预算') || input.includes('钱') || input.includes('元') || input.includes('开销') || input.includes('费用')) {
+    return aiResponses['预算'];
+  }
+  if (input.includes('公寓') || input.includes('房子') || input.includes('住') || input.includes('不在家')) {
+    return aiResponses['公寓'];
+  }
+  if (input.includes('品种') || input.includes('什么猫') || input.includes('推荐')) {
+    return aiResponses['品种'];
+  }
+  return aiResponses['default'];
+}
+
+function addMobileAIMessage(text, isUser) {
+  const chat = document.getElementById('m-ai-chat');
+  const bubble = document.createElement('div');
+  bubble.className = `ai-bubble ${isUser ? 'user' : 'bot'} fade-in`;
+  bubble.innerHTML = text.replace(/\n/g, '<br>');
+  chat.appendChild(bubble);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function addDesktopAIMessage(text, isUser) {
+  const chat = document.getElementById('d-ai-messages');
+  const bubble = document.createElement('div');
+  bubble.className = `ai-bubble ${isUser ? 'user' : 'bot'} fade-in`;
+  bubble.style.maxWidth = '80%';
+  bubble.innerHTML = text.replace(/\n/g, '<br>');
+  chat.appendChild(bubble);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// ========== 事件绑定 ==========
+// 移动端导航
+document.querySelectorAll('#app-mobile .nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const screenName = item.dataset.screen;
+    document.querySelectorAll('#app-mobile .screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('#app-mobile .nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('m-screen-' + screenName).classList.add('active');
+    item.classList.add('active');
+  });
+});
+
+// 移动端顶部Tab
+document.querySelectorAll('#m-screen-home .top-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('#m-screen-home .top-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    renderMobileHome(tab.dataset.tab);
+  });
+});
+
+// 移动端AI发送
+document.getElementById('m-ai-send').addEventListener('click', () => {
+  const input = document.getElementById('m-ai-input');
+  const text = input.value.trim();
+  if (!text) return;
+  addMobileAIMessage(text, true);
+  input.value = '';
+  setTimeout(() => {
+    addMobileAIMessage(getAIResponse(text), false);
+  }, 600);
+});
+document.getElementById('m-ai-input').addEventListener('keypress', e => {
+  if (e.key === 'Enter') document.getElementById('m-ai-send').click();
+});
+
+// 桌面端侧边栏
+document.querySelectorAll('.sidebar-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const pageName = item.dataset.page;
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    document.querySelectorAll('.desktop-page').forEach(p => p.classList.remove('active'));
+    item.classList.add('active');
+    document.getElementById('d-page-' + pageName).classList.add('active');
+  });
+});
+
+// 桌面端AI发送
+document.getElementById('d-ai-send').addEventListener('click', () => {
+  const input = document.getElementById('d-ai-input');
+  const text = input.value.trim();
+  if (!text) return;
+  addDesktopAIMessage(text, true);
+  input.value = '';
+  setTimeout(() => {
+    addDesktopAIMessage(getAIResponse(text), false);
+  }, 600);
+});
+document.getElementById('d-ai-input').addEventListener('keypress', e => {
+  if (e.key === 'Enter') document.getElementById('d-ai-send').click();
+});
+
+// 桌面端头部Tab
+document.querySelectorAll('.header-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.header-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+  });
+});
+
+// ========== 初始化 ==========
+renderMobileHome('recommend');
+renderMobileMoment();
+renderMobileMsg();
+renderDesktopHome();
+renderDesktopMoment();
+renderDesktopMsg();
+renderDesktopHot();
+</script>
+</body>
+</html>
