@@ -34,6 +34,64 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 .fade-in { animation: fadeIn 0.3s ease; }
+.publish-modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(45,33,24,0.5); z-index: 200; display: none;
+  justify-content: center;
+}
+.publish-modal-overlay.show { display: flex; }
+.publish-modal {
+  background: var(--card-bg);
+  max-height: 85vh; overflow-y: auto;
+  padding: 0;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.publish-modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; background: var(--card-bg); z-index: 5;
+}
+.publish-modal-header h3 { font-size: 17px; font-weight: 700; color: var(--text); }
+.publish-modal-close {
+  width: 32px; height: 32px; border-radius: 50%; background: var(--bg);
+  border: none; font-size: 18px; cursor: pointer; display: flex;
+  align-items: center; justify-content: center; color: var(--text-secondary);
+}
+.publish-modal-body { padding: 20px; }
+.publish-field { margin-bottom: 16px; }
+.publish-field label {
+  display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.publish-field input, .publish-field textarea, .publish-field select {
+  width: 100%; padding: 10px 14px; border: 1px solid var(--border);
+  border-radius: 10px; font-size: 14px; font-family: inherit;
+  background: var(--bg); color: var(--text); outline: none;
+  transition: border-color 0.2s;
+}
+.publish-field input:focus, .publish-field textarea:focus, .publish-field select:focus {
+  border-color: var(--primary);
+}
+.publish-field textarea { min-height: 120px; resize: vertical; }
+.publish-upload-area {
+  border: 2px dashed var(--border); border-radius: 12px;
+  padding: 40px 20px; text-align: center; background: var(--bg);
+  color: var(--text-light); font-size: 14px; cursor: pointer;
+  transition: border-color 0.2s;
+}
+.publish-upload-area:hover { border-color: var(--primary); }
+.publish-upload-area .upload-icon { font-size: 40px; margin-bottom: 8px; }
+.publish-submit-btn {
+  width: 100%; padding: 14px; border: none; border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white; font-size: 16px; font-weight: 600; cursor: pointer;
+  font-family: inherit; transition: opacity 0.2s;
+}
+.publish-submit-btn:hover { opacity: 0.9; }
+.publish-submit-btn:active { opacity: 0.8; }
 @keyframes likeBounce {
   0% { transform: scale(1); }
   50% { transform: scale(1.4); }
@@ -392,10 +450,43 @@ body {
     border-bottom: 1px solid var(--border);
   }
   .profile-action-btn {
-    flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--border);
-    background: var(--bg); font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit;
+    flex: 1; padding: 10px; border-radius: 12px; border: 1px solid var(--border);
+    background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg) 100%);
+    font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
+    color: var(--text-secondary); position: relative; overflow: hidden;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-  .profile-action-btn.primary { background: var(--primary); color: white; border-color: var(--primary); }
+  .profile-action-btn::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+    opacity: 1; transition: opacity 0.3s; pointer-events: none;
+  }
+  .profile-action-btn::after {
+    content: ''; position: absolute; top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.6s ease;
+    pointer-events: none;
+  }
+  .profile-action-btn:hover::after { left: 150%; }
+  .profile-action-btn:hover {
+    border-color: var(--primary);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(255,140,66,0.2);
+  }
+  .profile-action-btn:active { transform: scale(0.97); }
+  .profile-action-btn.primary {
+    background: linear-gradient(135deg, #FF8C42 0%, #F07A3A 50%, #E67335 100%);
+    color: white; border-color: transparent;
+    box-shadow: 0 6px 18px rgba(255,140,66,0.35);
+  }
+  .profile-action-btn.primary::before {
+    background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+  }
+  .profile-action-btn.primary:hover {
+    box-shadow: 0 8px 24px rgba(255,140,66,0.45);
+  }
   .profile-content-tabs {
     display: flex; gap: 16px; padding: 0 16px; height: 44px;
     align-items: center; background: var(--card-bg); border-bottom: 1px solid var(--border);
@@ -452,18 +543,53 @@ body {
   }
   .ledger-mode-switch-inner {
     display: flex; border-radius: 20px; overflow: hidden;
-    border: 1px solid var(--border); background: var(--bg);
+    border: none; background: transparent;
+    box-shadow: none;
   }
   .ledger-mode-btn {
-    padding: 10px 20px; font-size: 13px; font-weight: 600;
+    padding: 12px 24px; font-size: 14px; font-weight: 600;
     color: var(--text-secondary); cursor: pointer;
-    transition: all 0.3s; border: none; background: transparent;
-    white-space: nowrap; border-radius: 100px; font-family: inherit;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: none; background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg) 100%);
+    white-space: nowrap; border-radius: 20px; font-family: inherit;
+    position: relative; overflow: hidden;
+    margin: 0 4px;
+    border: 1px solid var(--border);
+  }
+  .ledger-mode-btn::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 60%);
+    opacity: 1; transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .ledger-mode-btn::after {
+    content: ''; position: absolute; top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.6s ease;
+    pointer-events: none;
+  }
+  .ledger-mode-btn:hover::after { left: 150%; }
+  .ledger-mode-btn:hover {
+    background: linear-gradient(135deg, var(--primary-light) 0%, #FFF5EE 100%);
+    border-color: var(--primary);
+    color: var(--primary-dark);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(255,140,66,0.2);
   }
   .ledger-mode-btn.active {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    color: white; font-weight: 700; box-shadow: 0 4px 12px rgba(255,140,66,0.3);
+    background: linear-gradient(135deg, #FF8C42 0%, #F07A3A 50%, #E67335 100%);
+    color: white; font-weight: 700;
+    box-shadow: 0 8px 24px rgba(255,140,66,0.45);
+    border-color: transparent;
+    transform: translateY(-3px) scale(1.02);
   }
+  .ledger-mode-btn.active::before {
+    background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+    opacity: 1;
+  }
+  .ledger-mode-btn:active { transform: scale(0.97); }
   .desktop-ledger-mode-switch {
     display: flex; justify-content: center; margin-bottom: 20px;
   }
@@ -654,27 +780,52 @@ body {
   .calc-header-m h2 { font-size: 20px; font-weight: 700; }
   .calc-header-m p { font-size: 13px; opacity: 0.9; margin-top: 4px; }
   .calc-tabs-m {
-    display: flex; padding: 12px; gap: 8px; background: var(--bg);
+    display: flex; padding: 8px; gap: 8px; background: var(--bg);
     position: sticky; top: 0; z-index: 10;
   }
   .calc-tab-m {
-    flex: 1; padding: 14px 10px; border-radius: 16px; border: 2px solid var(--border);
-    background: var(--card-bg); text-align: center; cursor: pointer;
-    font-family: inherit; transition: all 0.25s; position: relative; overflow: hidden;
+    flex: 1; padding: 10px 8px; border-radius: 14px; border: 2px solid var(--border);
+    background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg) 100%);
+    text-align: center; cursor: pointer;
+    font-family: inherit; transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative; overflow: hidden;
   }
   .calc-tab-m::before {
     content: ''; position: absolute; inset: 0;
-    background: linear-gradient(135deg, var(--primary-light) 0%, transparent 60%);
-    opacity: 0; transition: opacity 0.25s; border-radius: 14px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+    opacity: 1; transition: opacity 0.25s; border-radius: 12px;
+    pointer-events: none;
+  }
+  .calc-tab-m::after {
+    content: ''; position: absolute; top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.6s ease;
+    pointer-events: none;
+  }
+  .calc-tab-m:hover::after { left: 150%; }
+  .calc-tab-m:hover {
+    border-color: var(--primary);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 6px 16px rgba(255,140,66,0.18);
   }
   .calc-tab-m.active {
-    border-color: var(--primary);
-    background: linear-gradient(135deg, var(--primary-light) 0%, #FFF5EE 100%);
-    box-shadow: 0 4px 16px rgba(255,140,66,0.15);
+    border-color: transparent;
+    background: linear-gradient(135deg, #FF8C42 0%, #F07A3A 50%, #E67335 100%);
+    box-shadow: 0 8px 24px rgba(255,140,66,0.45);
+    transform: translateY(-3px) scale(1.02);
   }
-  .calc-tab-m.active::before { opacity: 1; }
-  .calc-tab-m .tab-name { font-size: 13px; font-weight: 600; position: relative; z-index: 1; }
-  .calc-tab-m .tab-price { font-size: 20px; font-weight: 700; color: var(--primary); margin-top: 6px; position: relative; z-index: 1; }
+  .calc-tab-m.active::before {
+    background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+    opacity: 1;
+  }
+  .calc-tab-m:active { transform: scale(0.97); }
+  .calc-tab-m .tab-name { font-size: 12px; font-weight: 600; position: relative; z-index: 1; }
+  .calc-tab-m .tab-price { font-size: 18px; font-weight: 700; color: var(--primary); margin-top: 4px; position: relative; z-index: 1; transition: color 0.3s; }
+  .calc-tab-m.active .tab-name { color: white; }
+  .calc-tab-m.active .tab-price { color: white; }
+
   .calc-content-m { padding: 0 12px 20px; }
   .calc-item-m {
     display: flex; align-items: center; justify-content: space-between;
@@ -697,8 +848,14 @@ body {
   .calc-total-m .total-price { font-size: 26px; font-weight: 700; color: var(--primary); }
   .calc-total-m .total-price span { font-size: 14px; color: var(--text-light); font-weight: 400; }
   .mode-toggle { display: flex; gap: 0; border-radius: 100px; background: var(--bg); border: 1px solid var(--border); overflow: hidden; margin-bottom: 10px; }
-  .mode-btn { flex: 1; padding: 10px 16px; border-radius: 100px; border: 1px solid var(--border); background: var(--card-bg); font-family: inherit; font-size: 13px; cursor: pointer; color: var(--text-secondary); font-weight: 500; transition: all 0.2s; }
-  .mode-btn.active { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; font-weight: 600; border-color: transparent; box-shadow: 0 4px 12px rgba(255,140,66,0.25); }
+  .mode-btn { flex: 1; padding: 10px 16px; border-radius: 100px; border: 1px solid var(--border); background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg) 100%); font-family: inherit; font-size: 13px; cursor: pointer; color: var(--text-secondary); font-weight: 500; transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; overflow: hidden; }
+  .mode-btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 60%); opacity: 1; transition: opacity 0.2s; pointer-events: none; }
+  .mode-btn::after { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transform: skewX(-20deg); transition: left 0.6s ease; pointer-events: none; }
+  .mode-btn:hover::after { left: 150%; }
+  .mode-btn:hover { border-color: var(--primary); transform: translateY(-3px) scale(1.02); box-shadow: 0 6px 16px rgba(255,140,66,0.18); }
+  .mode-btn.active { background: linear-gradient(135deg, #FF8C42 0%, #F07A3A 50%, #E67335 100%); color: white; font-weight: 600; border-color: transparent; box-shadow: 0 6px 18px rgba(255,140,66,0.35); }
+  .mode-btn.active::before { background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 60%); opacity: 1; }
+  .mode-btn:active { transform: scale(0.97); }
   .product-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
   .product-card { background: white; border-radius: 10px; border: 1px solid var(--border); overflow: hidden; }
   .product-img { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; font-size: 40px; background: var(--primary-light); }
@@ -721,8 +878,10 @@ body {
   .product-checkbox input:checked + .check-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; box-shadow: 0 4px 12px rgba(255,140,66,0.25); }
   .filter-bar { display: flex; gap: 8px; padding: 10px 12px; overflow-x: auto; scrollbar-width: none; }
   .filter-bar::-webkit-scrollbar { display: none; }
-  .filter-chip { padding: 8px 14px; border-radius: 100px; border: 1px solid var(--border); background: var(--card-bg); font-size: 12px; white-space: nowrap; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+  .filter-chip { padding: 8px 14px; border-radius: 100px; border: 1px solid var(--border); background: var(--card-bg); font-size: 12px; white-space: nowrap; cursor: pointer; font-weight: 500; transition: all 0.2s; position: relative; overflow: hidden; }
+  .filter-chip::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 60%); opacity: 0; transition: opacity 0.2s; }
   .filter-chip.active { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; border-color: transparent; font-weight: 600; box-shadow: 0 4px 12px rgba(255,140,66,0.25); }
+  .filter-chip.active::before { opacity: 1; }
   .btn-more { padding: 14px; border-radius: 14px; border: 2px dashed var(--primary); text-align: center; color: var(--primary); font-size: 13px; cursor: pointer; background: linear-gradient(135deg, var(--primary-light) 0%, #FFF5EE 100%); font-weight: 600; transition: all 0.2s; }
   .btn-more:hover { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; border-style: solid; }
   .budget-cart-bar { position: fixed; bottom: 60px; left: 0; right: 0; padding: 10px 16px; background: white; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 60; }
@@ -756,10 +915,34 @@ body {
   .food-card-m .food-info p { font-size: 12px; color: var(--text-light); margin-top: 2px; }
   .quick-actions-m { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
   .quick-btn-m {
-    padding: 6px 12px; border-radius: 100px; font-size: 12px;
-    background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary);
-    cursor: pointer; font-family: inherit; font-weight: 500;
+    padding: 8px 16px; border-radius: 100px; font-size: 12px;
+    background: linear-gradient(135deg, var(--primary-light) 0%, #FFF5EE 100%);
+    color: var(--primary-dark); border: 1px solid var(--primary);
+    cursor: pointer; font-family: inherit; font-weight: 600;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative; overflow: hidden;
   }
+  .quick-btn-m::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 60%);
+    opacity: 1; transition: opacity 0.2s; pointer-events: none;
+  }
+  .quick-btn-m::after {
+    content: ''; position: absolute; top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.6s ease;
+    pointer-events: none;
+  }
+  .quick-btn-m:hover::after { left: 150%; }
+  .quick-btn-m:hover {
+    background: linear-gradient(135deg, #FF8C42 0%, #F07A3A 50%, #E67335 100%);
+    color: white; border-color: transparent;
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 6px 18px rgba(255,140,66,0.35);
+  }
+  .quick-btn-m:active { transform: scale(0.97); }
   .thinking-m {
     color: var(--text-light); font-size: 12px; font-style: italic; margin-bottom: 8px;
     padding: 8px; background: var(--primary-light); border-radius: 8px;
@@ -777,87 +960,122 @@ body {
   .fab-btn:active { transform: scale(0.95); }
   .fab-panel {
     position: fixed; bottom: 140px; right: 20px; z-index: 89;
-    background: var(--card-bg); border-radius: 16px; padding: 12px 0;
-    box-shadow: 0 8px 32px rgba(45,33,24,0.2); border: 1px solid var(--border);
-    display: none; min-width: 180px;
-    animation: fadeIn 0.25s ease;
+    background: var(--card-bg); border-radius: 20px; padding: 14px;
+    box-shadow: 0 12px 40px rgba(45,33,24,0.18); border: 1px solid var(--border);
+    display: none; min-width: 200px;
+    animation: fadeIn 0.3s ease;
   }
   .fab-panel.show { display: block; }
   .fab-panel-item {
-    display: flex; align-items: center; gap: 12px; padding: 14px 18px;
-    cursor: pointer; font-size: 14px; color: white; transition: all 0.25s;
+    display: flex; align-items: center; gap: 14px; padding: 14px 18px;
+    cursor: pointer; font-size: 14px; color: white;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     font-family: inherit; border: none; width: 100%; text-align: left;
-    border-radius: 14px; margin-bottom: 8px; font-weight: 600;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    box-shadow: 0 4px 12px rgba(255,140,66,0.25);
+    border-radius: 16px; margin-bottom: 10px; font-weight: 600;
     position: relative; overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+  }
+  .fab-panel-item:last-child { margin-bottom: 0; }
+  .fab-panel-item:nth-child(1) {
+    background: linear-gradient(135deg, #FF8C42 0%, #F07A3A 50%, #E67335 100%);
+    box-shadow: 0 4px 16px rgba(255,140,66,0.35);
+  }
+  .fab-panel-item:nth-child(2) {
+    background: linear-gradient(135deg, #F0706A 0%, #E85D5D 50%, #D4605A 100%);
+    box-shadow: 0 4px 16px rgba(212,96,90,0.35);
   }
   .fab-panel-item::before {
     content: ''; position: absolute; inset: 0;
-    background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+    background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 60%);
   }
-  .fab-panel-item:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(255,140,66,0.35); }
-  .fab-panel-item:active { transform: translateY(0); }
-  .fab-panel-item .fab-item-icon { font-size: 22px; position: relative; z-index: 1; }
-  .fab-panel-item .fab-item-text { font-weight: 600; position: relative; z-index: 1; }
+  .fab-panel-item::after {
+    content: ''; position: absolute; top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.6s ease;
+  }
+  .fab-panel-item:hover::after { left: 150%; }
+  .fab-panel-item:hover { transform: translateY(-3px) scale(1.02); }
+  .fab-panel-item:nth-child(1):hover { box-shadow: 0 8px 24px rgba(255,140,66,0.45); }
+  .fab-panel-item:nth-child(2):hover { box-shadow: 0 8px 24px rgba(212,96,90,0.45); }
+  .fab-panel-item:active { transform: translateY(-1px) scale(0.98); }
+  .fab-panel-item .fab-item-icon {
+    width: 38px; height: 38px; border-radius: 12px;
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+    position: relative; z-index: 1;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .fab-panel-item .fab-item-text { font-weight: 600; position: relative; z-index: 1; letter-spacing: 0.5px; }
   .publish-modal-overlay {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(45,33,24,0.5); z-index: 200; display: none;
-    align-items: flex-end; justify-content: center;
+    align-items: flex-end;
   }
-  .publish-modal-overlay.show { display: flex; }
   .publish-modal {
-    background: var(--card-bg); border-radius: 20px 20px 0 0;
-    width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto;
-    padding: 0; animation: slideUp 0.3s ease;
+    border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 500px;
+    animation: slideUp 0.3s ease;
   }
-  @keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
+  /* 移动端商城样式 */
+  .mall-product-grid-m { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 8px; background: #f5f5f5; }
+  .mall-product-card-m { background: white; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
+  .mall-product-img { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; font-size: 64px; background: #f8f8f8; position: relative; }
+  .mall-product-info { padding: 8px 10px 10px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+  .mall-product-name { font-size: 13px; font-weight: 400; line-height: 1.3; color: #333; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 34px; }
+  .mall-price-row { display: flex; align-items: baseline; gap: 4px; margin-top: 6px; }
+  .mall-price-current { font-size: 18px; font-weight: 700; color: #FF5000; }
+  .mall-price-current::before { content: '¥'; font-size: 12px; font-weight: 500; margin-right: 1px; }
+  .mall-price-original { font-size: 11px; color: #999; text-decoration: line-through; }
+  .mall-price-original::before { content: '¥'; }
+  .mall-sales { font-size: 11px; color: #999; margin-top: 2px; }
+  .mall-shop-name { font-size: 11px; color: #666; margin-top: 2px; display: flex; align-items: center; gap: 2px; }
+  .mall-shop-name::before { content: '🏪'; font-size: 10px; }
+  .mall-card-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+  .add-budget-btn {
+    padding: 4px 10px; border-radius: 100px; border: none;
+    background: linear-gradient(135deg, #FF9000 0%, #FF5000 100%);
+    color: white; font-size: 11px; font-weight: 500; cursor: pointer; font-family: inherit;
+    box-shadow: 0 2px 6px rgba(255,80,0,0.2); transition: all 0.2s;
+    flex-shrink: 0;
   }
-  .publish-modal-header {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 16px 20px; border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; background: var(--card-bg); z-index: 5;
-  }
-  .publish-modal-header h3 { font-size: 17px; font-weight: 700; color: var(--text); }
-  .publish-modal-close {
-    width: 32px; height: 32px; border-radius: 50%; background: var(--bg);
-    border: none; font-size: 18px; cursor: pointer; display: flex;
-    align-items: center; justify-content: center; color: var(--text-secondary);
-  }
-  .publish-modal-body { padding: 20px; }
-  .publish-field { margin-bottom: 16px; }
-  .publish-field label {
-    display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary);
-    margin-bottom: 6px;
-  }
-  .publish-field input, .publish-field textarea, .publish-field select {
-    width: 100%; padding: 10px 14px; border: 1px solid var(--border);
-    border-radius: 10px; font-size: 14px; font-family: inherit;
-    background: var(--bg); color: var(--text); outline: none;
-    transition: border-color 0.2s;
-  }
-  .publish-field input:focus, .publish-field textarea:focus, .publish-field select:focus {
-    border-color: var(--primary);
-  }
-  .publish-field textarea { min-height: 120px; resize: vertical; }
-  .publish-upload-area {
-    border: 2px dashed var(--border); border-radius: 12px;
-    padding: 40px 20px; text-align: center; background: var(--bg);
-    color: var(--text-light); font-size: 14px; cursor: pointer;
-    transition: border-color 0.2s;
-  }
-  .publish-upload-area:hover { border-color: var(--primary); }
-  .publish-upload-area .upload-icon { font-size: 40px; margin-bottom: 8px; }
-  .publish-submit-btn {
-    width: 100%; padding: 14px; border: none; border-radius: 12px;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    color: white; font-size: 16px; font-weight: 600; cursor: pointer;
-    font-family: inherit; transition: opacity 0.2s;
-  }
-  .publish-submit-btn:hover { opacity: 0.9; }
-  .publish-submit-btn:active { opacity: 0.8; }
+  .add-budget-btn:hover { transform: scale(1.05); }
+  .add-budget-btn:active { transform: scale(0.95); }
+  .add-budget-btn.added { background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%); box-shadow: 0 2px 6px rgba(76,175,80,0.2); }
+  .mall-tags-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  .mall-tag { font-size: 9px; padding: 1px 5px; border-radius: 2px; background: #FFF0E8; color: #FF5000; border: 1px solid #FFD0B8; font-weight: 500; }
+  .mall-rank-badge { position: absolute; top: 0; left: 0; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; z-index: 2; }
+  .mall-rank-badge.top1 { background: linear-gradient(135deg, #FFD700, #FFA000); border-radius: 0 0 12px 0; }
+  .mall-rank-badge.top2 { background: linear-gradient(135deg, #C0C0C0, #909090); border-radius: 0 0 12px 0; }
+  .mall-rank-badge.top3 { background: linear-gradient(135deg, #CD7F32, #A0522D); border-radius: 0 0 12px 0; }
+  /* 列表布局 */
+  .mall-product-list-m { display: flex; flex-direction: column; background: #f5f5f5; }
+  .mall-product-list-item-m { display: flex; background: white; padding: 12px; border-bottom: 1px solid #f0f0f0; gap: 12px; position: relative; }
+  .mall-product-list-item-m .list-img { width: 130px; height: 130px; flex-shrink: 0; border-radius: 8px; overflow: hidden; background: #f8f8f8; display: flex; align-items: center; justify-content: center; font-size: 56px; position: relative; }
+  .mall-product-list-item-m .list-info { flex: 1; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
+  .mall-product-list-item-m .list-tag-small { display: inline-block; font-size: 10px; padding: 1px 5px; border-radius: 3px; color: #FF5000; background: #FFF0E8; font-weight: 500; margin-right: 4px; vertical-align: middle; }
+  .mall-product-list-item-m .list-title { font-size: 15px; line-height: 1.4; color: #222; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-weight: 400; margin-top: 4px; }
+  .mall-product-list-item-m .list-price-row { display: flex; align-items: baseline; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .mall-product-list-item-m .list-price { font-size: 22px; font-weight: 700; color: #FF5000; }
+  .mall-product-list-item-m .list-price::before { content: '¥'; font-size: 13px; font-weight: 500; vertical-align: 2px; margin-right: 1px; }
+  .mall-product-list-item-m .list-price-suffix { font-size: 12px; color: #FF5000; font-weight: 500; }
+  .mall-product-list-item-m .list-sales { font-size: 12px; color: #999; margin-left: 6px; }
+  .mall-product-list-item-m .list-promo-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .mall-product-list-item-m .list-promo-tag { font-size: 11px; padding: 2px 6px; border-radius: 3px; color: #FF5000; background: #FFF0E8; font-weight: 500; white-space: nowrap; }
+  .mall-product-list-item-m .list-promo-tag.red { color: #FF0036; background: #FFE8EC; }
+  .mall-product-list-item-m .list-shop-row { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+  .mall-product-list-item-m .list-shop { font-size: 12px; color: #999; display: flex; align-items: center; gap: 2px; }
+  .mall-product-list-item-m .list-shop::before { content: '🏪'; font-size: 11px; }
+  .mall-product-list-item-more { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 20px; color: #ccc; cursor: pointer; display: none; }
+  /* 加入预算弹窗 */
+  .budget-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; }
+  .budget-modal-overlay.show { display: flex; }
+  .budget-modal { background: white; border-radius: 16px; width: 86%; max-width: 340px; padding: 20px; }
+  .budget-modal h4 { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+  .budget-modal-item { padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 8px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+  .budget-modal-item:hover { background: var(--primary-light); border-color: var(--primary); }
 }
 
 @media (min-width: 1024px) {
@@ -1096,12 +1314,14 @@ body {
     background: var(--card-bg); border: 1px solid var(--border);
     font-size: 13px; cursor: pointer; white-space: nowrap;
     transition: all 0.2s; font-family: inherit; color: var(--text);
-    flex-shrink: 0;
+    flex-shrink: 0; position: relative; overflow: hidden;
   }
+  .desktop-group-chip::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 60%); opacity: 0; transition: opacity 0.2s; }
   .desktop-group-chip.active {
-    background: var(--primary-light); border-color: var(--primary);
-    color: var(--primary-dark); font-weight: 600;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); border-color: transparent;
+    color: white; font-weight: 600; box-shadow: 0 4px 12px rgba(255,140,66,0.25);
   }
+  .desktop-group-chip.active::before { opacity: 1; }
   .desktop-group-chip:hover { border-color: var(--primary); }
   .desktop-group-chip .group-members { font-size: 11px; color: var(--text-light); margin-left: 4px; }
   .desktop-adopt-banner {
@@ -1140,11 +1360,56 @@ body {
   .desktop-fab.active { transform: rotate(45deg); }
   .desktop-fab-panel {
     position: fixed; bottom: 96px; right: 310px; z-index: 91;
-    background: var(--card-bg); border-radius: 16px; padding: 10px 0;
-    box-shadow: 0 8px 32px rgba(45,33,24,0.2); border: 1px solid var(--border);
-    display: none; min-width: 180px; animation: fadeIn 0.25s ease;
+    background: transparent; border-radius: 20px; padding: 10px;
+    box-shadow: none; border: none;
+    display: none; min-width: 200px; animation: fadeIn 0.3s ease;
   }
   .desktop-fab-panel.show { display: block; }
+  .desktop-fab-panel .fab-panel-item {
+    display: flex; align-items: center; gap: 14px; padding: 14px 18px;
+    cursor: pointer; font-size: 14px; color: white;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-family: inherit; border: none; width: 100%; text-align: left;
+    border-radius: 16px; margin-bottom: 10px; font-weight: 600;
+    position: relative; overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+  }
+  .desktop-fab-panel .fab-panel-item:last-child { margin-bottom: 0; }
+  .desktop-fab-panel .fab-panel-item:nth-child(1) {
+    background: linear-gradient(135deg, #FF8C42 0%, #F07A3A 50%, #E67335 100%);
+    box-shadow: 0 4px 16px rgba(255,140,66,0.35);
+  }
+  .desktop-fab-panel .fab-panel-item:nth-child(2) {
+    background: linear-gradient(135deg, #F0706A 0%, #E85D5D 50%, #D4605A 100%);
+    box-shadow: 0 4px 16px rgba(212,96,90,0.35);
+  }
+  .desktop-fab-panel .fab-panel-item::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+  }
+  .desktop-fab-panel .fab-panel-item::after {
+    content: ''; position: absolute; top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.6s ease;
+  }
+  .desktop-fab-panel .fab-panel-item:hover::after { left: 150%; }
+  .desktop-fab-panel .fab-panel-item:hover { transform: translateY(-3px) scale(1.02); }
+  .desktop-fab-panel .fab-panel-item:nth-child(1):hover { box-shadow: 0 8px 24px rgba(255,140,66,0.45); }
+  .desktop-fab-panel .fab-panel-item:nth-child(2):hover { box-shadow: 0 8px 24px rgba(212,96,90,0.45); }
+  .desktop-fab-panel .fab-panel-item:active { transform: translateY(-1px) scale(0.98); }
+  .desktop-fab-panel .fab-panel-item .fab-item-icon {
+    width: 38px; height: 38px; border-radius: 12px;
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+    position: relative; z-index: 1;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .desktop-fab-panel .fab-panel-item .fab-item-text { font-weight: 600; position: relative; z-index: 1; letter-spacing: 0.5px; }
   .d-msg-tab {
     padding: 14px 16px; font-weight: 500; cursor: pointer; color: var(--text-secondary);
     border-bottom: 1px solid var(--border); transition: background 0.2s, color 0.2s;
@@ -1154,10 +1419,16 @@ body {
   .publish-modal-overlay {
     align-items: center !important;
     z-index: 9999 !important;
+    animation: fadeIn 0.25s ease;
   }
   .publish-modal {
     border-radius: 20px !important;
     width: 90%; max-width: 560px; max-height: 80vh;
+    animation: modalScaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes modalScaleIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
   }
   .publish-modal-body { padding: 24px !important; }
   .publish-field label { font-size: 14px !important; }
@@ -1238,8 +1509,14 @@ body {
     display: flex; gap: 0; border-radius: 100px; background: var(--bg); border: 1px solid var(--border);
     overflow: hidden; margin: 12px 16px;
   }
-  .calc-mode-switch-global .mode-btn { flex: 1; padding: 10px 16px; border-radius: 100px; border: 1px solid var(--border); background: var(--card-bg); font-family: inherit; font-size: 13px; cursor: pointer; color: var(--text-secondary); font-weight: 500; transition: all 0.2s; }
-  .calc-mode-switch-global .mode-btn.active { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; font-weight: 600; border-color: transparent; box-shadow: 0 4px 12px rgba(255,140,66,0.25); }
+  .calc-mode-switch-global .mode-btn { flex: 1; padding: 10px 16px; border-radius: 100px; border: 1px solid var(--border); background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg) 100%); font-family: inherit; font-size: 13px; cursor: pointer; color: var(--text-secondary); font-weight: 500; transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; overflow: hidden; }
+  .calc-mode-switch-global .mode-btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 60%); opacity: 1; transition: opacity 0.2s; pointer-events: none; }
+  .calc-mode-switch-global .mode-btn::after { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transform: skewX(-20deg); transition: left 0.6s ease; pointer-events: none; }
+  .calc-mode-switch-global .mode-btn:hover::after { left: 150%; }
+  .calc-mode-switch-global .mode-btn:hover { border-color: var(--primary); transform: translateY(-3px) scale(1.02); box-shadow: 0 6px 16px rgba(255,140,66,0.18); }
+  .calc-mode-switch-global .mode-btn.active { background: linear-gradient(135deg, #FF8C42 0%, #F07A3A 50%, #E67335 100%); color: white; font-weight: 600; border-color: transparent; box-shadow: 0 6px 18px rgba(255,140,66,0.35); }
+  .calc-mode-switch-global .mode-btn.active::before { background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 60%); opacity: 1; }
+  .calc-mode-switch-global .mode-btn:active { transform: scale(0.97); }
   .calc-flat-row {
     display: flex; align-items: center; justify-content: space-between;
     padding: 14px; background: var(--card-bg); border-radius: 12px;
@@ -1271,27 +1548,59 @@ body {
   /* 商城样式 */
   .mall-category-bar { display: flex; gap: 8px; padding: 10px 12px; overflow-x: auto; white-space: nowrap; background: var(--card-bg); border-bottom: 1px solid var(--border); }
   .mall-category-bar::-webkit-scrollbar { display: none; }
-  .mall-cat-tab { padding: 10px 18px; border-radius: 100px; border: 1px solid var(--border); background: var(--card-bg); font-size: 13px; white-space: nowrap; cursor: pointer; font-family: inherit; font-weight: 500; transition: all 0.2s; }
+  .mall-cat-tab { padding: 10px 18px; border-radius: 100px; border: 1px solid var(--border); background: var(--card-bg); font-size: 13px; white-space: nowrap; cursor: pointer; font-family: inherit; font-weight: 500; transition: all 0.2s; position: relative; overflow: hidden; }
+  .mall-cat-tab::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 60%); opacity: 0; transition: opacity 0.2s; }
   .mall-cat-tab.active { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; border-color: transparent; font-weight: 600; box-shadow: 0 4px 12px rgba(255,140,66,0.25); }
-  .mall-product-grid-m { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 12px; }
-  .mall-product-card-m { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; }
-  .mall-product-img { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; font-size: 56px; background: linear-gradient(135deg, var(--primary-light) 0%, #FFF0E6 100%); }
-  .mall-product-info { padding: 10px; flex: 1; display: flex; flex-direction: column; }
-  .mall-product-name { font-size: 13px; font-weight: 500; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .mall-price-row { display: flex; align-items: baseline; gap: 6px; margin-top: 6px; }
-  .mall-price-current { font-size: 16px; font-weight: 700; color: var(--red); }
-  .mall-price-original { font-size: 11px; color: var(--text-light); text-decoration: line-through; }
-  .mall-sales { font-size: 11px; color: var(--text-light); margin-top: 2px; }
-  .mall-shop-name { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+  .mall-cat-tab.active::before { opacity: 1; }
+  .mall-product-grid-m { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 8px; background: #f5f5f5; }
+  .mall-product-card-m { background: white; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
+  .mall-product-img { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; font-size: 64px; background: #f8f8f8; position: relative; }
+  .mall-product-info { padding: 8px 10px 10px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+  .mall-product-name { font-size: 13px; font-weight: 400; line-height: 1.3; color: #333; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 34px; }
+  .mall-price-row { display: flex; align-items: baseline; gap: 4px; margin-top: 6px; }
+  .mall-price-current { font-size: 18px; font-weight: 700; color: #FF5000; }
+  .mall-price-current::before { content: '¥'; font-size: 12px; font-weight: 500; margin-right: 1px; }
+  .mall-price-original { font-size: 11px; color: #999; text-decoration: line-through; }
+  .mall-price-original::before { content: '¥'; }
+  .mall-sales { font-size: 11px; color: #999; margin-top: 2px; }
+  .mall-shop-name { font-size: 11px; color: #666; margin-top: 2px; display: flex; align-items: center; gap: 2px; }
+  .mall-shop-name::before { content: '🏪'; font-size: 10px; }
+  .mall-card-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
   .add-budget-btn {
-    margin-top: 8px; width: 100%; padding: 10px; border-radius: 100px; border: none;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    color: white; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
-    box-shadow: 0 4px 12px rgba(255,140,66,0.25); transition: all 0.2s;
+    padding: 4px 10px; border-radius: 100px; border: none;
+    background: linear-gradient(135deg, #FF9000 0%, #FF5000 100%);
+    color: white; font-size: 11px; font-weight: 500; cursor: pointer; font-family: inherit;
+    box-shadow: 0 2px 6px rgba(255,80,0,0.2); transition: all 0.2s;
+    flex-shrink: 0;
   }
-  .add-budget-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(255,140,66,0.35); }
-  .add-budget-btn:active { transform: translateY(0); }
-  .add-budget-btn.added { background: linear-gradient(135deg, #8BC34A 0%, #4CAF50 100%); box-shadow: 0 4px 12px rgba(139,195,74,0.25); }
+  .add-budget-btn:hover { transform: scale(1.05); }
+  .add-budget-btn:active { transform: scale(0.95); }
+  .add-budget-btn.added { background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%); box-shadow: 0 2px 6px rgba(76,175,80,0.2); }
+  .mall-tags-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  .mall-tag { font-size: 9px; padding: 1px 5px; border-radius: 2px; background: #FFF0E8; color: #FF5000; border: 1px solid #FFD0B8; font-weight: 500; }
+  .mall-rank-badge { position: absolute; top: 0; left: 0; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; z-index: 2; }
+  .mall-rank-badge.top1 { background: linear-gradient(135deg, #FFD700, #FFA000); border-radius: 0 0 12px 0; }
+  .mall-rank-badge.top2 { background: linear-gradient(135deg, #C0C0C0, #909090); border-radius: 0 0 12px 0; }
+  .mall-rank-badge.top3 { background: linear-gradient(135deg, #CD7F32, #A0522D); border-radius: 0 0 12px 0; }
+  /* 列表布局 */
+  .mall-product-list-m { display: flex; flex-direction: column; background: #f5f5f5; }
+  .mall-product-list-item-m { display: flex; background: white; padding: 12px; border-bottom: 1px solid #f0f0f0; gap: 12px; position: relative; }
+  .mall-product-list-item-m .list-img { width: 130px; height: 130px; flex-shrink: 0; border-radius: 8px; overflow: hidden; background: #f8f8f8; display: flex; align-items: center; justify-content: center; font-size: 56px; position: relative; }
+  .mall-product-list-item-m .list-info { flex: 1; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
+  .mall-product-list-item-m .list-tag-small { display: inline-block; font-size: 10px; padding: 1px 5px; border-radius: 3px; color: #FF5000; background: #FFF0E8; font-weight: 500; margin-right: 4px; vertical-align: middle; }
+  .mall-product-list-item-m .list-title { font-size: 15px; line-height: 1.4; color: #222; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-weight: 400; margin-top: 4px; }
+  .mall-product-list-item-m .list-price-row { display: flex; align-items: baseline; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .mall-product-list-item-m .list-price { font-size: 22px; font-weight: 700; color: #FF5000; }
+  .mall-product-list-item-m .list-price::before { content: '¥'; font-size: 13px; font-weight: 500; vertical-align: 2px; margin-right: 1px; }
+  .mall-product-list-item-m .list-price-suffix { font-size: 12px; color: #FF5000; font-weight: 500; }
+  .mall-product-list-item-m .list-sales { font-size: 12px; color: #999; margin-left: 6px; }
+  .mall-product-list-item-m .list-promo-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .mall-product-list-item-m .list-promo-tag { font-size: 11px; padding: 2px 6px; border-radius: 3px; color: #FF5000; background: #FFF0E8; font-weight: 500; white-space: nowrap; }
+  .mall-product-list-item-m .list-promo-tag.red { color: #FF0036; background: #FFE8EC; }
+  .mall-product-list-item-m .list-shop-row { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+  .mall-product-list-item-m .list-shop { font-size: 12px; color: #999; display: flex; align-items: center; gap: 2px; }
+  .mall-product-list-item-m .list-shop::before { content: '🏪'; font-size: 11px; }
+  .mall-product-list-item-more { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 20px; color: #ccc; cursor: pointer; display: none; }
   /* 加入预算弹窗 */
   .budget-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; }
   .budget-modal-overlay.show { display: flex; }
@@ -1367,8 +1676,11 @@ body {
 .cat-radio-item {
   padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border);
   background: var(--bg); font-size: 13px; cursor: pointer; transition: all 0.2s;
+  position: relative; overflow: hidden;
 }
-.cat-radio-item.active { background: var(--primary); color: white; border-color: var(--primary); }
+.cat-radio-item::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 60%); opacity: 0; transition: opacity 0.2s; }
+.cat-radio-item.active { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; border-color: transparent; box-shadow: 0 4px 12px rgba(255,140,66,0.25); }
+.cat-radio-item.active::before { opacity: 1; }
 .cat-btn-primary {
   width: 100%; padding: 14px; border: none; border-radius: 12px;
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
@@ -1376,17 +1688,62 @@ body {
 }
 .cat-btn-secondary {
   width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 12px;
-  background: var(--bg); color: var(--text); font-size: 14px; font-weight: 500;
+  background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg) 100%);
+  color: var(--text); font-size: 14px; font-weight: 600;
   cursor: pointer; font-family: inherit; margin-top: 10px;
+  position: relative; overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+.cat-btn-secondary::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+  opacity: 1; transition: opacity 0.3s; pointer-events: none;
+}
+.cat-btn-secondary::after {
+  content: ''; position: absolute; top: 0; left: -100%;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.6s ease;
+  pointer-events: none;
+}
+.cat-btn-secondary:hover::after { left: 150%; }
+.cat-btn-secondary:hover {
+  border-color: var(--primary);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(255,140,66,0.2);
+}
+.cat-btn-secondary:active { transform: scale(0.97); }
 .cat-btn-row { display: flex; gap: 10px; }
 .cat-btn-row .cat-btn-primary, .cat-btn-row .cat-btn-secondary { flex: 1; margin-top: 0; }
+.cat-action-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 24px; border-radius: 9999px;
+  font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative; overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  white-space: nowrap; border: none;
+}
+.cat-action-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+.cat-action-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); }
+.cat-action-btn:active { transform: translateY(0) scale(0.98); }
+.cat-action-btn.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white; border: none;
+}
+.cat-action-btn.secondary {
+  background: #ffffff; color: #374151; border: 1px solid #e5e7eb;
+}
 .cat-chip-group { display: flex; gap: 8px; flex-wrap: wrap; }
 .cat-chip {
   padding: 6px 12px; border-radius: 16px; border: 1px solid var(--border);
   background: var(--bg); font-size: 12px; cursor: pointer; transition: all 0.2s;
+  position: relative; overflow: hidden;
 }
-.cat-chip.active { background: var(--primary-light); color: var(--primary-dark); border-color: var(--primary); }
+.cat-chip::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 60%); opacity: 0; transition: opacity 0.2s; }
+.cat-chip.active { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; border-color: transparent; box-shadow: 0 4px 12px rgba(255,140,66,0.25); }
+.cat-chip.active::before { opacity: 1; }
 .cat-record-row {
   display: flex; gap: 10px; overflow-x: auto; padding: 12px 16px;
   background: var(--card-bg); border-bottom: 1px solid var(--border);
@@ -1394,10 +1751,13 @@ body {
 .cat-record-row::-webkit-scrollbar { display: none; }
 .cat-record-btn {
   display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 10px 14px; border-radius: 12px; background: var(--primary-light);
+  padding: 10px 14px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary-light) 0%, #FFF5EE 100%);
   border: 1px solid var(--border); cursor: pointer; flex-shrink: 0;
-  min-width: 64px;
+  min-width: 64px; transition: all 0.2s; position: relative; overflow: hidden;
 }
+.cat-record-btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 60%); }
+.cat-record-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255,140,66,0.15); border-color: var(--primary); }
 .cat-record-btn .rec-icon { font-size: 22px; }
 .cat-record-btn .rec-label { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
 .cat-info-bar {
@@ -1421,8 +1781,11 @@ body {
 .cat-tf-btn {
   padding: 6px 12px; border-radius: 16px; border: 1px solid var(--border);
   background: var(--bg); font-size: 12px; cursor: pointer; white-space: nowrap;
+  transition: all 0.2s; position: relative; overflow: hidden;
 }
-.cat-tf-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+.cat-tf-btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 60%); opacity: 0; transition: opacity 0.2s; }
+.cat-tf-btn.active { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; border-color: transparent; box-shadow: 0 4px 12px rgba(255,140,66,0.25); }
+.cat-tf-btn.active::before { opacity: 1; }
 .cat-timeline-month {
   font-size: 13px; font-weight: 700; color: var(--text-secondary);
   padding: 12px 16px 4px; background: var(--bg);
@@ -1522,14 +1885,716 @@ body {
   .cat-info-bar { border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--border); }
   .cat-timeline-filter { border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--border); position: static; }
   .calc-flat-row { padding: 16px 18px; }
+  .calc-desktop-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    background: var(--bg);
+  }
+  .bubble-tab {
+    flex: 1;
+    min-width: 100px;
+    padding: 10px 8px;
+    border-radius: 14px;
+    border: 2px solid var(--border);
+    background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg) 100%);
+    text-align: center;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .bubble-tab::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+    opacity: 1;
+    transition: opacity 0.25s;
+    border-radius: 12px;
+    pointer-events: none;
+  }
+  .bubble-tab::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.6s ease;
+    pointer-events: none;
+  }
+  .bubble-tab:hover::after {
+    left: 150%;
+  }
+  .bubble-tab:hover {
+    border-color: var(--primary);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 6px 16px rgba(255,140,66,0.18);
+  }
+  .bubble-tab.active {
+    border-color: transparent;
+    background: linear-gradient(135deg, #FF8C42 0%, #F07A3A 50%, #E67335 100%);
+    box-shadow: 0 8px 24px rgba(255,140,66,0.45);
+    transform: translateY(-3px) scale(1.02);
+  }
+  .bubble-tab.active::before {
+    background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+    opacity: 1;
+  }
+  .bubble-tab:active {
+    transform: scale(0.97);
+  }
+  .bubble-tab .tab-name {
+    font-size: 12px;
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+    display: block;
+  }
+  .bubble-tab .tab-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-top: 4px;
+    position: relative;
+    z-index: 1;
+    display: block;
+    transition: color 0.3s;
+  }
+  .bubble-tab.active .tab-name {
+    color: white;
+  }
+  .bubble-tab.active .tab-price {
+    color: white;
+  }
   .mall-product-grid-d { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 16px; }
   .mall-product-card-d { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; }
   .mall-product-card-d:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
   .mall-product-card-d .mall-product-img { font-size: 72px; }
   .mall-product-card-d .add-budget-btn { padding: 10px; }
+  .desktop-ledger-mode-switch {
+    display: flex; justify-content: center; margin-bottom: 20px;
+  }
+  .desktop-ledger-header {
+    background: var(--card-bg); padding: 24px; text-align: center;
+    border-radius: 16px; border: 1px solid var(--border); margin-bottom: 20px;
+  }
+  .desktop-ledger-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;
+  }
+  .desktop-ledger-card {
+    background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border);
+    padding: 20px;
+  }
+  .ledger-section-title {
+    font-size: 15px; font-weight: 700; margin-bottom: 16px;
+  }
+  .prep-section {
+    padding: 16px; background: var(--card-bg); border-radius: 16px;
+    border: 1px solid var(--border); margin: 12px 0;
+  }
+  .prep-section-title {
+    font-size: 15px; font-weight: 700; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .prep-amount { font-size: 28px; font-weight: 700; color: var(--primary); }
+  .prep-label { font-size: 13px; color: var(--text-light); margin-top: 4px; }
+  .prep-item-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px;
+  }
+  .prep-item-row:last-child { border-bottom: none; }
+  .prep-item-name { color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .prep-item-price { font-weight: 600; color: var(--primary); }
+  .prep-checklist-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px;
+    cursor: pointer;
+  }
+  .prep-checklist-item:last-child { border-bottom: none; }
+  .prep-check-icon {
+    width: 22px; height: 22px; border-radius: 6px;
+    border: 2px solid var(--border); display: flex;
+    align-items: center; justify-content: center; flex-shrink: 0;
+    cursor: pointer; transition: all 0.2s; margin-top: 2px;
+  }
+  .prep-check-icon.checked {
+    background: var(--green); border-color: var(--green); color: white; font-size: 12px;
+  }
+  .prep-urgency-tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 600;
+  }
+  .prep-urgency-required { background: #FFEBEE; color: #D32F2F; }
+  .prep-urgency-recommended { background: #FFF8E1; color: #F57F17; }
+  .prep-urgency-optional { background: #E8F5E9; color: #388E3C; }
+  .prep-tip-card {
+    padding: 14px; border-radius: 12px; margin: 12px 0;
+    font-size: 13px; line-height: 1.6; color: var(--text-secondary);
+  }
+  .prep-summary-bar {
+    display: flex; justify-content: space-around; align-items: center;
+    padding: 16px; background: var(--primary-light); border-radius: 12px;
+    margin: 12px 0;
+  }
+  .prep-summary-item { text-align: center; }
+  .prep-summary-value { font-size: 20px; font-weight: 700; color: var(--primary); }
+  .prep-summary-label { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+  .pie-chart-container {
+    display: flex; align-items: center; gap: 20px;
+  }
+  .pie-chart {
+    width: 120px; height: 120px; border-radius: 50%;
+    background: conic-gradient(
+      var(--primary) 0deg 162deg,
+      var(--green) 162deg 234deg,
+      var(--red) 234deg 288deg,
+      var(--gold) 288deg 324deg,
+      var(--text-light) 324deg 360deg
+    );
+    flex-shrink: 0;
+  }
+  .pie-legend { flex: 1; }
+  .pie-legend-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; margin-bottom: 8px;
+  }
+  .pie-legend-dot {
+    width: 12px; height: 12px; border-radius: 50%;
+  }
+  .bar-chart {
+    display: flex; align-items: flex-end; justify-content: space-around;
+    height: 180px; padding: 0 10px;
+  }
+  .bar-item {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    flex: 1;
+  }
+  .bar-fill {
+    width: 24px; background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+    border-radius: 4px 4px 0 0; min-height: 4px;
+    transition: height 0.5s ease;
+  }
+  .bar-label { font-size: 12px; color: var(--text-light); }
+  .ledger-advice {
+    background: var(--primary-light); padding: 14px; border-radius: 12px;
+    font-size: 13px; line-height: 1.6; color: var(--text-secondary);
+  }
+  .ledger-compare {
+    background: var(--card-bg); padding: 16px; border-radius: 12px;
+    border: 1px solid var(--border); text-align: center;
+  }
+  .ledger-compare-text { font-size: 14px; font-weight: 600; color: var(--text); }
+  .ledger-compare-sub { font-size: 12px; color: var(--text-light); margin-top: 4px; }
+  .settings-section-title {
+    padding: 12px 16px; font-size: 13px; font-weight: 600;
+    color: var(--text-light); background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  .settings-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; border-bottom: 1px solid var(--border);
+    cursor: pointer; transition: background 0.2s;
+  }
+  .settings-item:last-child { border-bottom: none; }
+  .settings-item:hover { background: var(--bg); }
+  .desktop-profile-tabs {
+    display: flex; gap: 4px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 6px;
+    overflow-x: auto;
+  }
+  .desktop-profile-tab {
+    flex: 1; min-width: 80px;
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 14px; font-weight: 500;
+    color: var(--text-secondary);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .desktop-profile-tab:hover {
+    background: var(--bg);
+    color: var(--text);
+  }
+  .desktop-profile-tab.active {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(255,140,66,0.3);
+  }
+  .quick-action-card {
+    transition: all 0.25s ease;
+    border: 1px solid var(--border);
+  }
+  .quick-action-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    border-color: var(--primary);
+  }
+}
+
+/* 编辑资料弹窗样式 */
+.edit-profile-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.edit-profile-modal {
+  background: var(--card-bg);
+  border-radius: 20px;
+  width: 90%;
+  max-width: 480px;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.edit-profile-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.edit-profile-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+.edit-profile-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bg);
+  font-size: 20px;
+  color: var(--text-light);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.edit-profile-close:hover {
+  background: var(--border);
+  color: var(--text);
+}
+.edit-profile-body {
+  padding: 24px;
+}
+.edit-profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.edit-profile-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.edit-profile-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.edit-profile-input {
+  padding: 12px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  font-size: 15px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+.edit-profile-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+.edit-profile-input::placeholder {
+  color: var(--text-light);
+}
+.edit-profile-textarea {
+  padding: 12px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  font-size: 15px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  min-height: 80px;
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+.edit-profile-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+.edit-profile-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 12px;
+}
+.edit-profile-btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.edit-profile-btn.cancel {
+  background: var(--bg);
+  color: var(--text);
+}
+.edit-profile-btn.cancel:hover {
+  background: var(--border);
+}
+.edit-profile-btn.save {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  box-shadow: 0 4px 12px rgba(255,140,66,0.3);
+}
+.edit-profile-btn.save:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255,140,66,0.4);
+}
+.edit-profile-modal::-webkit-scrollbar {
+  width: 6px;
+}
+.edit-profile-modal::-webkit-scrollbar-track {
+  background: transparent;
+}
+.edit-profile-modal::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+.edit-profile-modal::-webkit-scrollbar-thumb:hover {
+  background: var(--text-light);
+}
+
+/* 查看用户资料弹窗样式 */
+.view-profile-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+.view-profile-modal {
+  background: var(--card-bg);
+  border-radius: 20px;
+  width: 90%;
+  max-width: 420px;
+  max-height: 70vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+.view-profile-modal::-webkit-scrollbar {
+  width: 6px;
+}
+.view-profile-modal::-webkit-scrollbar-track {
+  background: transparent;
+}
+.view-profile-modal::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+.view-profile-header {
+  padding: 24px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+.view-profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-light), #FFF5EE);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  margin: 0 auto 16px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.view-profile-avatar:hover {
+  transform: scale(1.05);
+}
+.view-profile-name {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.view-profile-id {
+  font-size: 13px;
+  color: var(--text-light);
+}
+.view-profile-mode {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 8px;
+}
+.view-profile-mode.owner {
+  background: linear-gradient(135deg, var(--primary-light), #FFF5EE);
+  color: var(--primary);
+}
+.view-profile-mode.preparer {
+  background: #E8F5E9;
+  color: #2E7D32;
+}
+.view-profile-body {
+  padding: 20px 24px;
+}
+.view-profile-info {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.view-profile-info:last-child {
+  border-bottom: none;
+}
+.view-profile-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+.view-profile-icon.bio { background: var(--primary-light); }
+.view-profile-icon.location { background: #E3F2FD; }
+.view-profile-icon.wechat { background: #E8F5E9; }
+.view-profile-icon.qq { background: #E3F2FD; }
+.view-profile-icon.birthday { background: #FFF3E0; }
+.view-profile-label {
+  font-size: 13px;
+  color: var(--text-light);
+  margin-bottom: 4px;
+}
+.view-profile-value {
+  font-size: 14px;
+  font-weight: 500;
+}
+.view-profile-empty {
+  font-size: 13px;
+  color: var(--text-light);
+  font-style: italic;
+}
+.view-profile-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 12px;
+}
+.view-profile-btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.view-profile-btn.close {
+  background: var(--bg);
+  color: var(--text);
+}
+.view-profile-btn.close:hover {
+  background: var(--border);
+}
+.view-profile-btn.edit {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  box-shadow: 0 4px 12px rgba(255,140,66,0.3);
+}
+.view-profile-btn.edit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255,140,66,0.4);
+}
+
+/* 功能入口卡片样式 */
+.quick-entry-card {
+  position: relative;
+  border-radius: 16px;
+  padding: 18px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.quick-entry-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+}
+.quick-entry-card::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: -10%;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+}
+.quick-entry-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+}
+.quick-entry-card:active {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.quick-entry-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+.quick-entry-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+  backdrop-filter: blur(4px);
+}
+.quick-entry-text {
+  flex: 1;
+  min-width: 0;
+}
+.quick-entry-title {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+.quick-entry-desc {
+  font-size: 12px;
+  opacity: 0.85;
+  line-height: 1.4;
+}
+.quick-entry-arrow {
+  font-size: 20px;
+  opacity: 0.9;
+  flex-shrink: 0;
+}
+.quick-entry-calc {
+  background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%);
+  box-shadow: 0 4px 16px rgba(255,140,66,0.3);
+}
+.quick-entry-ai {
+  background: linear-gradient(135deg, #9B59B6 0%, #8E44AD 100%);
+  box-shadow: 0 4px 16px rgba(155,89,182,0.3);
+}
+/* 移动端功能入口横排 */
+.mobile-quick-entries {
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+}
+.mobile-quick-entries .quick-entry-card {
+  flex: 1;
+  min-width: 0;
+  padding: 14px;
+  border-radius: 14px;
+}
+.mobile-quick-entries .quick-entry-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+.mobile-quick-entries .quick-entry-icon svg {
+  width: 18px;
+  height: 18px;
+}
+.mobile-quick-entries .quick-entry-title {
+  font-size: 14px;
+}
+.mobile-quick-entries .quick-entry-desc {
+  font-size: 11px;
 }
 
 /* 通用商城样式 */
+.mall-category-bar { display: flex; gap: 8px; padding: 10px 12px; overflow-x: auto; white-space: nowrap; background: var(--card-bg); border-bottom: 1px solid var(--border); }
+.mall-category-bar::-webkit-scrollbar { display: none; }
+.mall-cat-tab { padding: 10px 18px; border-radius: 100px; border: 1px solid var(--border); background: var(--card-bg); font-size: 13px; white-space: nowrap; cursor: pointer; font-family: inherit; font-weight: 500; transition: all 0.2s; position: relative; overflow: hidden; }
+.mall-cat-tab::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 60%); opacity: 0; transition: opacity 0.2s; }
+.mall-cat-tab.active { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; border-color: transparent; font-weight: 600; box-shadow: 0 4px 12px rgba(255,140,66,0.25); }
+.mall-cat-tab.active::before { opacity: 1; }
+.mall-product-img { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; font-size: 56px; background: linear-gradient(135deg, var(--primary-light) 0%, #FFF0E6 100%); }
+.mall-product-info { padding: 10px; flex: 1; display: flex; flex-direction: column; }
+.mall-product-name { font-size: 13px; font-weight: 500; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mall-price-row { display: flex; align-items: baseline; gap: 6px; margin-top: 6px; }
+.mall-price-current { font-size: 16px; font-weight: 700; color: var(--red); }
+.mall-price-original { font-size: 11px; color: var(--text-light); text-decoration: line-through; }
+.mall-sales { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+.mall-shop-name { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+.add-budget-btn {
+  margin-top: 8px; width: 100%; padding: 10px; border-radius: 100px; border: none;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+  box-shadow: 0 4px 12px rgba(255,140,66,0.25); transition: all 0.2s;
+}
+.add-budget-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(255,140,66,0.35); }
+.add-budget-btn:active { transform: translateY(0); }
+.add-budget-btn.added { background: linear-gradient(135deg, #8BC34A 0%, #4CAF50 100%); box-shadow: 0 4px 12px rgba(139,195,74,0.25); }
 .mall-tags-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 .mall-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #FCE8E8; color: var(--red); }
 /* 商城推荐标签 */
@@ -1546,6 +2611,12 @@ body {
 .mall-friend-badge { font-size: 10px; color: var(--primary); font-weight: 600; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
 .mall-friend-avatars { display: flex; margin-left: 4px; }
 .mall-friend-avatars span { font-size: 12px; margin-left: -4px; }
+/* 布局切换 */
+.mall-layout-toggle { display: flex; align-items: center; gap: 4px; padding: 0 12px; background: transparent; border: none; cursor: pointer; font-size: 18px; color: #666; }
+.mall-top-bar { display: flex; align-items: center; justify-content: space-between; padding: 0 12px; background: white; border-bottom: 1px solid #f0f0f0; }
+.mall-sort-bar { display: flex; align-items: center; padding: 10px 12px; background: white; border-bottom: 1px solid #f0f0f0; gap: 20px; font-size: 14px; }
+.mall-sort-item { color: #666; cursor: pointer; font-weight: 500; }
+.mall-sort-item.active { color: #FF5000; font-weight: 700; }
 /* 猫咪档案增强 */
 .cat-health-card { background: linear-gradient(135deg, #F0FFF4, #E8F5E9); border: 1px solid #A5D6A7; border-radius: 12px; padding: 14px; margin: 12px 0; }
 .cat-health-card.warning { background: linear-gradient(135deg, #FFF8E1, #FFF3E0); border-color: #FFCC02; }
@@ -1586,6 +2657,69 @@ body {
 .knowledge-card-enh .k-desc { font-size: 12px; color: var(--text-light); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .knowledge-card-enh .k-stat { font-size: 11px; color: var(--text-light); margin-top: 4px; }
 
+.mode-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 12px; border-radius: 100px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: all 0.2s; font-family: inherit;
+}
+.mode-badge.owner {
+  background: linear-gradient(135deg, #FF8C42 0%, #E67335 100%);
+  color: white;
+}
+.mode-badge.preparer {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+.mode-badge:hover { transform: scale(1.05); }
+.mode-select-card {
+  display: flex; align-items: center;
+  padding: 16px; border-radius: 14px;
+  border: 2px solid var(--border);
+  cursor: pointer; transition: all 0.2s;
+  background: var(--card-bg);
+}
+.mode-select-card:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+.mode-select-card.selected {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+.mode-select-card .mode-check {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--primary); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+  opacity: 0; transform: scale(0.8);
+  transition: all 0.2s;
+}
+.mode-select-card.selected .mode-check {
+  opacity: 1; transform: scale(1);
+}
+.settings-header-m {
+  padding: 16px; background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 10;
+}
+.mobile-settings-group {
+  background: var(--card-bg); border-radius: 12px;
+  margin-bottom: 12px; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.settings-group-title {
+  padding: 10px 14px; font-size: 12px; font-weight: 600;
+  color: var(--text-light); background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.mobile-settings-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.mobile-settings-item:last-child { border-bottom: none; }
+.mobile-settings-item:active { background: var(--bg); }
 </style>
 </head>
 <body>
@@ -1685,22 +2819,25 @@ body {
   <div class="screen" id="m-screen-profile">
     <div class="profile-header-m">
       <div class="profile-top">
-        <div class="profile-avatar-m">😺</div>
+        <div class="profile-avatar-m" onclick="showViewProfileModal()" style="cursor:pointer;">😺</div>
         <div>
-          <div class="profile-name-m">准铲屎官小王<span class="profile-verified">已认证</span></div>
-          <div class="profile-id-m">ID: catready_2026 · 已准备养猫 15 天</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="profile-name-m" id="m-profile-name">准铲屎官小王</div>
+            <span class="mode-badge preparer" id="m-mode-badge" onclick="showModeSwitchModal()" style="font-size:11px;padding:3px 10px;">🏠 准铲屎官</span>
+          </div>
+          <div class="profile-id-m" id="m-profile-id">ID: catready_2026 · 已准备养猫 15 天</div>
         </div>
       </div>
       <div class="profile-stats-m">
         <div class="profile-stat-m"><div class="num">89</div><div class="label">获赞</div></div>
         <div class="profile-stat-m"><div class="num">328</div><div class="label">粉丝</div></div>
         <div class="profile-stat-m"><div class="num">156</div><div class="label">关注</div></div>
-        <div class="profile-stat-m"><div class="num">3</div><div class="label">猫咪</div></div>
+        <div class="profile-stat-m"><div class="num" id="m-cat-count">3</div><div class="label">猫咪</div></div>
       </div>
     </div>
     <div class="profile-actions">
-      <button class="profile-action-btn primary">编辑资料</button>
-      <button class="profile-action-btn">设置</button>
+      <button class="profile-action-btn primary" onclick="showEditProfileModal()">编辑资料</button>
+      <button class="profile-action-btn" onclick="switchMobileScreen('settings')">设置</button>
     </div>
     <div class="profile-content-tabs" id="m-profile-tabs">
       <div class="profile-content-tab active" data-ptab="works">作品</div>
@@ -1711,6 +2848,67 @@ body {
       <div class="profile-content-tab" data-ptab="fav">收藏</div>
     </div>
     <div id="m-profile-content" style="padding-bottom:80px;"></div>
+  </div>
+  <div class="screen" id="m-screen-settings">
+    <div class="settings-header-m">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:20px;cursor:pointer;" onclick="switchMobileScreen('profile')">←</span>
+        <div style="font-size:18px;font-weight:700;">⚙️ 设置</div>
+      </div>
+    </div>
+    <div style="padding:12px 16px;padding-bottom:80px;">
+      <div class="mobile-settings-group">
+        <div class="settings-group-title">账号设置</div>
+        <div class="mobile-settings-item" onclick="showModeSwitchModal()">
+          <span style="font-size:20px;">🔄</span>
+          <span style="flex:1;font-size:15px;font-weight:500;">切换用户模式</span>
+          <span id="m-settings-mode-label" style="font-size:13px;color:var(--text-light);">🏠 准铲屎官</span>
+          <span style="color:var(--text-light);">›</span>
+        </div>
+        <div class="mobile-settings-item">
+          <span style="font-size:20px;">👤</span>
+          <span style="flex:1;font-size:15px;font-weight:500;">编辑个人资料</span>
+          <span style="color:var(--text-light);">›</span>
+        </div>
+        <div class="mobile-settings-item">
+          <span style="font-size:20px;">🔒</span>
+          <span style="flex:1;font-size:15px;font-weight:500;">账号安全</span>
+          <span style="color:var(--text-light);">›</span>
+        </div>
+      </div>
+      <div class="mobile-settings-group">
+        <div class="settings-group-title">通用设置</div>
+        <div class="mobile-settings-item">
+          <span style="font-size:20px;">🔔</span>
+          <span style="flex:1;font-size:15px;font-weight:500;">消息通知</span>
+          <span style="color:var(--text-light);">›</span>
+        </div>
+        <div class="mobile-settings-item">
+          <span style="font-size:20px;">🌙</span>
+          <span style="flex:1;font-size:15px;font-weight:500;">深色模式</span>
+          <span style="color:var(--text-light);">›</span>
+        </div>
+        <div class="mobile-settings-item">
+          <span style="font-size:20px;">🔐</span>
+          <span style="flex:1;font-size:15px;font-weight:500;">隐私设置</span>
+          <span style="color:var(--text-light);">›</span>
+        </div>
+      </div>
+      <div class="mobile-settings-group">
+        <div class="settings-group-title">关于</div>
+        <div class="mobile-settings-item">
+          <span style="font-size:20px;">ℹ️</span>
+          <span style="flex:1;font-size:15px;font-weight:500;">关于喵记</span>
+          <span style="font-size:13px;color:var(--text-light);">v4.0.0</span>
+          <span style="color:var(--text-light);">›</span>
+        </div>
+        <div class="mobile-settings-item">
+          <span style="font-size:20px;">❓</span>
+          <span style="flex:1;font-size:15px;font-weight:500;">帮助与反馈</span>
+          <span style="color:var(--text-light);">›</span>
+        </div>
+      </div>
+    </div>
   </div>
   <div class="bottom-nav">
     <div class="nav-item active" data-screen="home">
@@ -1846,33 +3044,87 @@ body {
         <div style="flex:1;min-width:0;" id="d-msg-list"></div>
       </div>
     </div>
+    <div class="desktop-page" id="d-page-settings">
+      <h2 style="font-size:20px;margin-bottom:20px;">⚙️ 设置</h2>
+      <div class="desktop-card" style="padding:0;margin-bottom:16px;overflow:hidden;">
+        <div class="settings-section-title">账号设置</div>
+        <div class="settings-item" onclick="showModeSwitchModal()">
+          <span style="font-size:20px;">🔄</span>
+          <span style="flex:1;font-size:14px;font-weight:500;">切换用户模式</span>
+          <span id="settings-mode-label" style="font-size:13px;color:var(--text-light);">🏠 准铲屎官</span>
+          <span style="color:var(--text-light);">›</span>
+        </div>
+        <div class="settings-item">
+          <span style="font-size:20px;">👤</span>
+          <span style="flex:1;font-size:14px;font-weight:500;">编辑个人资料</span>
+          <span style="color:var(--text-light);">›</span>
+        </div>
+        <div class="settings-item">
+          <span style="font-size:20px;">🔐</span>
+          <span style="flex:1;font-size:14px;font-weight:500;">账号安全</span>
+          <span style="color:var(--text-light);">›</span>
+        </div>
+      </div>
+      <div class="desktop-card" style="padding:0;margin-bottom:16px;overflow:hidden;">
+        <div class="settings-section-title">通用设置</div>
+        <div class="settings-item">
+          <span style="font-size:20px;">🔔</span>
+          <span style="flex:1;font-size:14px;font-weight:500;">消息通知</span>
+          <span style="color:var(--text-light);">›</span>
+        </div>
+        <div class="settings-item">
+          <span style="font-size:20px;">🌙</span>
+          <span style="flex:1;font-size:14px;font-weight:500;">深色模式</span>
+          <span style="color:var(--text-light);">›</span>
+        </div>
+        <div class="settings-item">
+          <span style="font-size:20px;">📱</span>
+          <span style="flex:1;font-size:14px;font-weight:500;">隐私设置</span>
+          <span style="color:var(--text-light);">›</span>
+        </div>
+      </div>
+      <div class="desktop-card" style="padding:0;margin-bottom:16px;overflow:hidden;">
+        <div class="settings-section-title">关于</div>
+        <div class="settings-item">
+          <span style="font-size:20px;">ℹ️</span>
+          <span style="flex:1;font-size:14px;font-weight:500;">关于喵记</span>
+          <span style="font-size:13px;color:var(--text-light);">v4.0.0</span>
+          <span style="color:var(--text-light);">›</span>
+        </div>
+        <div class="settings-item">
+          <span style="font-size:20px;">❓</span>
+          <span style="flex:1;font-size:14px;font-weight:500;">帮助与反馈</span>
+          <span style="color:var(--text-light);">›</span>
+        </div>
+      </div>
+    </div>
     <div class="desktop-page" id="d-page-profile">
       <div class="desktop-profile-header">
-        <div class="desktop-profile-avatar">😺</div>
-        <div>
-          <div class="desktop-profile-name">准铲屎官小王</div>
-          <div class="desktop-profile-id">ID: catready_2026 · 已准备养猫 15 天</div>
+        <div class="desktop-profile-avatar" onclick="showViewProfileModal()" style="cursor:pointer;">😺</div>
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="desktop-profile-name" id="d-profile-name">准铲屎官小王</div>
+            <span class="mode-badge" id="d-mode-badge" onclick="showModeSwitchModal()">🏠 准铲屎官</span>
+          </div>
+          <div class="desktop-profile-id" id="d-profile-id">ID: catready_2026 · 已准备养猫 15 天</div>
         </div>
+        <button style="display:flex;align-items:center;gap:6px;padding:10px 20px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(255,140,66,0.3);transition:transform 0.2s,box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 16px rgba(255,140,66,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 12px rgba(255,140,66,0.3)'" onclick="showEditProfileModal()">✏️ 编辑资料</button>
       </div>
       <div class="desktop-profile-stats">
         <div class="desktop-profile-stat"><div class="num">89</div><div class="label">获赞</div></div>
         <div class="desktop-profile-stat"><div class="num">328</div><div class="label">粉丝</div></div>
         <div class="desktop-profile-stat"><div class="num">156</div><div class="label">关注</div></div>
-        <div class="desktop-profile-stat"><div class="num">3</div><div class="label">猫咪</div></div>
+        <div class="desktop-profile-stat"><div class="num" id="d-cat-count">3</div><div class="label">猫咪</div></div>
       </div>
-      <div style="display:flex;gap:12px;margin-bottom:20px;">
-        <button style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(255,140,66,0.3);transition:transform 0.2s,box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(255,140,66,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 16px rgba(255,140,66,0.3)'">✏️ 编辑资料</button>
-        <button style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border:1.5px solid var(--border);border-radius:12px;background:var(--card-bg);color:var(--text);font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:transform 0.2s,background 0.2s,border-color 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.background='var(--primary-light)';this.style.borderColor='var(--primary)'" onmouseout="this.style.transform='';this.style.background='var(--card-bg)';this.style.borderColor='var(--border)'">⚙️ 设置</button>
+      <div class="desktop-profile-tabs">
+        <div class="desktop-profile-tab active" data-dptab="works" onclick="switchDesktopProfileTab('works')">作品</div>
+        <div class="desktop-profile-tab" data-dptab="cats" onclick="switchDesktopProfileTab('cats')">猫咪档案</div>
+        <div class="desktop-profile-tab" data-dptab="ledger" onclick="switchDesktopProfileTab('ledger')">养猫账本</div>
+        <div class="desktop-profile-tab" data-dptab="ai" onclick="switchDesktopProfileTab('ai')">AI顾问</div>
+        <div class="desktop-profile-tab" data-dptab="groups" onclick="switchDesktopProfileTab('groups')">我的群聊</div>
+        <div class="desktop-profile-tab" data-dptab="fav" onclick="switchDesktopProfileTab('fav')">收藏</div>
       </div>
-      <div class="desktop-profile-menu" style="margin-bottom:20px;">
-        <div class="desktop-menu-item" onclick="switchDesktopProfileTab('works')"><span style="font-size:20px;">🎬</span><span style="flex:1;">我的作品</span><span style="color:var(--text-light);">›</span></div>
-        <div class="desktop-menu-item" onclick="switchDesktopProfileTab('cats')"><span style="font-size:20px;">📋</span><span style="flex:1;">猫咪档案</span><span style="color:var(--text-light);">›</span></div>
-        <div class="desktop-menu-item" onclick="switchDesktopProfileTab('ledger')"><span style="font-size:20px;">💰</span><span style="flex:1;">养猫账本</span><span style="color:var(--text-light);">›</span></div>
-        <div class="desktop-menu-item" onclick="switchDesktopPage('ai')"><span style="font-size:20px;">🤖</span><span style="flex:1;">AI顾问</span><span style="color:var(--text-light);">›</span></div>
-        <div class="desktop-menu-item" onclick="switchDesktopProfileTab('groups')"><span style="font-size:20px;">👥</span><span style="flex:1;">我的群聊</span><span style="color:var(--text-light);">›</span></div>
-        <div class="desktop-menu-item" onclick="switchDesktopProfileTab('fav')"><span style="font-size:20px;">⭐</span><span style="flex:1;">收藏</span><span style="color:var(--text-light);">›</span></div>
-      </div>
-      <div id="d-profile-tab-content"></div>
+      <div id="d-profile-tab-content" style="margin-top:16px;"></div>
     </div>
   </div>
   <div class="rightbar">
@@ -2398,6 +3650,7 @@ const mallFriendPurchases = [
   { productId:'m24', friends:['🐱小花','🐱Luna的主人','🐱多多妈','🐱布丁爸','🐱豆豆家'] },
 ];
 let currentMallRecommend = "all";
+let currentMallLayout = "grid";
 const privateChats = [
   { id:'pc1',name:'阿花',avatar:'🐱',lastMsg:'你家橘子的猫粮在哪里买的呀？',time:'12:30',unread:2,online:true },
   { id:'pc2',name:'miaomiao',avatar:'🐈',lastMsg:'谢谢推荐！已经下单了',time:'10:15',unread:0,online:false },
@@ -2482,17 +3735,67 @@ function renderMobileMall() {
   html += `</div>`;
   html += `<div class="mall-category-bar">`;
   html += mallCategories.map(c => `<button class="mall-cat-tab ${c===currentMallCategory?'active':''}" onclick="switchMallCategory('${c}')">${c}</button>`).join('');
-  html += `</div><div class="mall-product-grid-m">`;
-  html += products.map((p,i) => {
-    const isAdded = isProductInBudgetCart(p.id);
-    const rank = currentMallRecommend === 'hot' ? (i+1) : 0;
-    const fp = mallFriendPurchases.find(f => f.productId === p.id);
-    let rankBadge = ''; if (rank>=1 && rank<=3) { rankBadge = `<div class="mall-rank-badge top${rank}">${rank}</div>`; }
-    let friendBadge = ''; if (fp) { friendBadge = `<div class="mall-friend-badge">👥 ${fp.friends.length}位好友已购<div class="mall-friend-avatars">${fp.friends.slice(0,3).map(n=>`<span>${n}</span>`).join('')}</div></div>`; }
-    return `<div class="mall-product-card-m" style="position:relative">${rankBadge}<div class="mall-product-img">${p.emoji}</div><div class="mall-product-info"><div class="mall-product-name">${p.name}</div><div class="mall-price-row"><span class="mall-price-current">¥${p.price}</span><span class="mall-price-original">¥${p.originalPrice}</span></div><div class="mall-sales">已售 ${p.sales}</div>${friendBadge}<div class="mall-shop-name">${p.shop}</div><div class="mall-tags-row">${p.tags.map(t=>`<span class="mall-tag">${t}</span>`).join('')}</div><button class="add-budget-btn ${isAdded?'added':''}" onclick="showAddToBudgetModal(mallProducts.find(mp=>mp.id==='${p.id}'))">${isAdded?'已加预算':'加入预算'}</button></div></div>`;
-  }).join('');
   html += `</div>`;
+  html += `<div class="mall-top-bar" style="padding:8px 12px;border-bottom:1px solid #f0f0f0;background:white;">
+    <div style="display:flex;gap:20px;font-size:13px;">
+      <span style="color:#FF5000;font-weight:700;">综合</span>
+      <span style="color:#666;">销量</span>
+      <span style="color:#666;">价格</span>
+    </div>
+    <button onclick="switchMallLayout()" style="background:none;border:none;font-size:18px;color:#666;cursor:pointer;">${currentMallLayout==='grid'?'☰':'▦'}</button>
+  </div>`;
+  if (currentMallLayout === 'grid') {
+    html += `<div class="mall-product-grid-m">`;
+    html += products.map((p,i) => {
+      const isAdded = isProductInBudgetCart(p.id);
+      const rank = currentMallRecommend === 'hot' ? (i+1) : 0;
+      const fp = mallFriendPurchases.find(f => f.productId === p.id);
+      let rankBadge = ''; if (rank>=1 && rank<=3) { rankBadge = `<div class="mall-rank-badge top${rank}">${rank}</div>`; }
+      return `<div class="mall-product-card-m">${rankBadge}<div class="mall-product-img">${p.emoji}</div><div class="mall-product-info"><div class="mall-product-name">${p.name}</div><div class="mall-price-row"><span class="mall-price-current">${p.price}</span><span class="mall-price-original">${p.originalPrice}</span></div><div class="mall-sales">已售 ${p.sales}</div><div class="mall-shop-name">${p.shop}</div><div class="mall-tags-row">${p.tags.map(t=>`<span class="mall-tag">${t}</span>`).join('')}</div><div class="mall-card-bottom"><div style="font-size:10px;color:#999;">${fp ? '👥好友已购' : ''}</div><button class="add-budget-btn ${isAdded?'added':''}" onclick="showAddToBudgetModal(mallProducts.find(mp=>mp.id==='${p.id}'))">${isAdded?'已加':'加购'}</button></div></div></div>`;
+    }).join('');
+    html += `</div>`;
+  } else {
+    html += `<div class="mall-product-list-m">`;
+    html += products.map((p,i) => {
+      const isAdded = isProductInBudgetCart(p.id);
+      const rank = currentMallRecommend === 'hot' ? (i+1) : 0;
+      const fp = mallFriendPurchases.find(f => f.productId === p.id);
+      let rankBadge = ''; if (rank>=1 && rank<=3) { rankBadge = `<div class="mall-rank-badge top${rank}">${rank}</div>`; }
+      let promoTags = p.tags.map((t,idx) => `<span class="list-promo-tag ${idx===0?'red':''}">${t}</span>`).join('');
+      let friendTag = fp ? `<span class="list-promo-tag">👥好友已购</span>` : '';
+      return `<div class="mall-product-list-item-m">
+        <div class="list-img">${rankBadge}${p.emoji}</div>
+        <div class="list-info">
+          <div>
+            <span class="list-tag-small">喵记优选</span>
+            <div class="list-title">${p.name}</div>
+          </div>
+          <div>
+            <div class="list-price-row">
+              <span class="list-price">${p.price}</span>
+              <span class="list-price-suffix">券后价</span>
+              <span class="list-sales">${p.sales}人付款</span>
+            </div>
+            <div class="list-promo-tags">${promoTags}${friendTag}</div>
+            <div class="list-shop-row">
+              <span class="list-shop">${p.shop} ></span>
+              <button class="add-budget-btn ${isAdded?'added':''}" onclick="showAddToBudgetModal(mallProducts.find(mp=>mp.id==='${p.id}'))" style="margin-top:0;padding:5px 12px;font-size:12px;">${isAdded?'已加预算':'加入预算'}</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    html += `</div>`;
+  }
   return html;
+}
+function switchMallLayout() {
+  currentMallLayout = currentMallLayout === 'grid' ? 'list' : 'grid';
+  if (window.innerWidth < 1024) {
+    renderMobileHome('mall');
+  } else {
+    renderDesktopHome('mall');
+  }
 }
 function switchMallRecommend(mode) { currentMallRecommend = mode; if(window.innerWidth<1024) renderMobileHome('mall'); else renderDesktopHome('mall'); }
 
@@ -2628,7 +3931,7 @@ function selectGroup(groupId) {
 function showMobileAdoptDetail() { switchMobileScreen("adopt-detail"); renderMobileAdoptCats(); }
 function showMobileKnowledgeDetail() { switchMobileScreen("knowledge-detail"); renderMobileKnowledge(); }
 function renderMobileAdoptCats() {
-  document.getElementById("m-adopt-cat-list").innerHTML = enhancedAdoptCats.map(c => `<div class="adopt-cat-card-enh"><div class="adopt-cat-header"><div class="adopt-cat-avatar">${c.avatar}</div><div class="adopt-cat-header-info"><div class="adopt-cat-name-enh">${c.name} · ${c.breed}</div><div class="adopt-cat-brief">${c.gender} · ${c.age} · 📍 ${c.location}</div></div><div class="adopt-level-badge ${c.level}">${c.levelText}</div></div><div class="adopt-cat-body" style="padding:0 14px 14px;"><div class="adopt-cat-desc" style="margin-bottom:10px;">${c.desc}</div><div class="adopt-cat-tags" style="display:flex;flex-wrap:wrap;gap:6px;">${c.tags.map(t=>`<span class="adopt-cat-tag green">${t}</span>`).join('')}</div><button class="adopt-cat-btn" onclick="showToast('已提交领养申请')">申请领养</button></div></div>`).join("");
+  document.getElementById("m-adopt-cat-list").innerHTML = enhancedAdoptCats.map(c => `<div class="adopt-cat-card-enh"><div class="adopt-cat-header"><div class="adopt-cat-avatar">${c.avatar}</div><div class="adopt-cat-header-info"><div class="adopt-cat-name-enh">${c.name} · ${c.breed}</div><div class="adopt-cat-brief">${c.gender} · ${c.age} · 📍 ${c.location}</div></div><div class="adopt-level-badge ${c.level}">${c.levelText}</div></div><div class="adopt-cat-body" style="padding:0 14px 14px;"><div class="adopt-cat-desc" style="margin-bottom:10px;">${c.desc}</div><div class="adopt-cat-tags" style="display:flex;flex-wrap:wrap;gap:6px;">${c.tags.map(t=>`<span class="adopt-cat-tag green">${t}</span>`).join('')}</div><button class="adopt-cat-btn" onclick="adoptCat('${c.id}')">确认领养</button></div></div>`).join("");
   document.getElementById("m-adopt-shops-list").innerHTML = adoptShops.map(s => `<div class="shop-list-card"><div class="shop-list-img">${s.icon}</div><div class="shop-list-info"><h5>${s.name}</h5><p>${s.desc}</p><div class="shop-list-rating">⭐ ${s.rating} · ${s.members}</div></div></div>`).join("");
 }
 function renderMobileKnowledge() {
@@ -2663,7 +3966,7 @@ function renderMobileProfile() {
     if (ledgerMode === 'preparer') {
       container.innerHTML = renderPrepRoom('mobile');
     } else {
-      container.innerHTML = renderModeSwitch(true) + `<div class="ledger-header"><div class="ledger-amount">¥1,280</div><div class="ledger-label">本月支出</div></div><div class="ledger-chart-section"><div class="ledger-section-title">支出分布</div><div class="pie-chart-container"><div class="pie-chart"></div><div class="pie-legend"><div class="pie-legend-item"><div class="pie-legend-dot" style="background:var(--primary);"></div>猫粮 45%</div><div class="pie-legend-item"><div class="pie-legend-dot" style="background:var(--green);"></div>猫砂 20%</div><div class="pie-legend-item"><div class="pie-legend-dot" style="background:var(--red);"></div>医疗 15%</div><div class="pie-legend-item"><div class="pie-legend-dot" style="background:var(--gold);"></div>玩具 10%</div><div class="pie-legend-item"><div class="pie-legend-dot" style="background:var(--text-light);"></div>其他 10%</div></div></div></div><div class="ledger-chart-section"><div class="ledger-section-title">近6个月支出趋势</div><div class="bar-chart">${[980,1150,890,1320,1080,1280].map((v,i)=>`<div class="bar-item"><div class="bar-fill" style="height:${v/15}px;"></div><div class="bar-label">${["1月","2月","3月","4月","5月","6月"][i]}</div></div>`).join("")}</div></div><div class="ledger-advice">💡 智能建议：本月医疗支出较高（疫苗+体检），建议下个月减少非必要玩具购买，平均每月可节省约150元。</div><div class="ledger-compare"><div class="ledger-compare-text">你的月均支出超过68%的铲屎官</div><div class="ledger-compare-sub">全国铲屎官月均支出：¥950</div></div><div style="padding:0 16px 16px;"><button class="profile-action-btn primary" style="width:100%;" onclick="showMobileCalc()">🧮 预算计算器</button></div>`;
+      container.innerHTML = `<div class="ledger-header"><div class="ledger-amount">¥1,280</div><div class="ledger-label">本月支出</div></div><div class="ledger-chart-section"><div class="ledger-section-title">支出分布</div><div class="pie-chart-container"><div class="pie-chart"></div><div class="pie-legend"><div class="pie-legend-item"><div class="pie-legend-dot" style="background:var(--primary);"></div>猫粮 45%</div><div class="pie-legend-item"><div class="pie-legend-dot" style="background:var(--green);"></div>猫砂 20%</div><div class="pie-legend-item"><div class="pie-legend-dot" style="background:var(--red);"></div>医疗 15%</div><div class="pie-legend-item"><div class="pie-legend-dot" style="background:var(--gold);"></div>玩具 10%</div><div class="pie-legend-item"><div class="pie-legend-dot" style="background:var(--text-light);"></div>其他 10%</div></div></div></div><div class="ledger-chart-section"><div class="ledger-section-title">近6个月支出趋势</div><div class="bar-chart">${[980,1150,890,1320,1080,1280].map((v,i)=>`<div class="bar-item"><div class="bar-fill" style="height:${v/15}px;"></div><div class="bar-label">${["1月","2月","3月","4月","5月","6月"][i]}</div></div>`).join("")}</div></div><div class="ledger-advice">💡 智能建议：本月医疗支出较高（疫苗+体检），建议下个月减少非必要玩具购买，平均每月可节省约150元。</div><div class="ledger-compare"><div class="ledger-compare-text">你的月均支出超过68%的铲屎官</div><div class="ledger-compare-sub">全国铲屎官月均支出：¥950</div></div><div style="padding:0 16px 16px;"><button class="profile-action-btn primary" style="width:100%;" onclick="showMobileCalc()">🧮 预算计算器</button></div>`;
     }
   } else if (currentProfileTab === "ai") {
     container.innerHTML = `<div class="ai-quick-card" onclick="openMobileAIChat()"><div class="ai-quick-card-header"><div class="ai-quick-card-avatar">🐱</div><div><div class="ai-quick-card-title">喵记 AI 顾问</div><div class="ai-quick-card-desc">预算估算 · 猫粮推荐 · 医学知识 · 护理指南</div></div></div><div class="quick-actions-m"><button class="quick-btn-m" onclick="event.stopPropagation();sendMobileAIQuick('帮我估算养猫预算')">预算估算</button><button class="quick-btn-m" onclick="event.stopPropagation();sendMobileAIQuick('推荐适合新手的猫粮')">猫粮推荐</button><button class="quick-btn-m" onclick="event.stopPropagation();sendMobileAIQuick('猫咪疫苗时间表')">疫苗时间</button></div></div>`;
@@ -2673,20 +3976,347 @@ function renderMobileProfile() {
     container.innerHTML = `<div style="padding:12px 16px;font-size:15px;font-weight:700;">收藏夹</div><div class="works-waterfall">${videoFeedData.slice(0,4).map(v=>`<div class="work-item"><div class="work-img">${v.emoji}</div><div class="work-info"><div class="work-title">${v.text.substring(0,20)}...</div><div class="work-stats">⭐ 收藏</div></div></div>`).join("")}</div>`;
   }
 }
-function renderModeSwitch(isOwner) {
-  return `<div class="ledger-mode-switch"><div class="ledger-mode-switch-inner"><button class="ledger-mode-btn ${isOwner?'active':''}" onclick="switchLedgerMode('owner')">🐱 铲屎官模式</button><button class="ledger-mode-btn ${!isOwner?'active':''}" onclick="switchLedgerMode('preparer')">🏠 准铲屎官模式</button></div></div>`;
+function renderDesktopLedger() {
+  let html = '';
+  const calcIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px;"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>';
+  const aiIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px;"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>';
+  html += `<div style="display:flex;gap:20px;align-items:flex-start;">`;
+  html += `<div style="flex:1;min-width:0;">`;
+  html += `<div class="desktop-ledger-header"><div class="ledger-amount">¥1,280</div><div class="ledger-label">本月支出</div></div>`;
+  html += `<div class="desktop-ledger-grid">`;
+  html += `<div class="desktop-ledger-card"><div class="ledger-section-title">支出分布</div><div class="pie-chart-container"><div class="pie-chart"></div><div class="pie-legend"><div class="pie-legend-item"><div class="pie-legend-dot" style="background:var(--primary);"></div>猫粮 45%</div><div class="pie-legend-item"><div class="pie-legend-dot" style="background:var(--green);"></div>猫砂 20%</div><div class="pie-legend-item"><div class="pie-legend-dot" style="background:var(--red);"></div>医疗 15%</div><div class="pie-legend-item"><div class="pie-legend-dot" style="background:var(--gold);"></div>玩具 10%</div><div class="pie-legend-item"><div class="pie-legend-dot" style="background:var(--text-light);"></div>其他 10%</div></div></div></div>`;
+  html += `<div class="desktop-ledger-card"><div class="ledger-section-title">近6个月支出趋势</div><div class="bar-chart">` + [980,1150,890,1320,1080,1280].map((v,i)=>`<div class="bar-item"><div class="bar-fill" style="height:${v/12}px;"></div><div class="bar-label">${["1月","2月","3月","4月","5月","6月"][i]}</div></div>`).join("") + `</div></div>`;
+  html += `</div>`;
+  html += `<div class="ledger-advice" style="margin:16px 0;">💡 <strong>智能建议：</strong>本月医疗支出较高（疫苗+体检），建议下个月减少非必要玩具购买，平均每月可节省约150元。</div>`;
+  html += `<div class="ledger-compare"><div class="ledger-compare-text">你的月均支出超过68%的铲屎官</div><div class="ledger-compare-sub">全国铲屎官月均支出：¥950</div></div>`;
+  html += `</div>`;
+  html += `<div style="width:260px;flex-shrink:0;display:flex;flex-direction:column;gap:16px;position:sticky;top:20px;">`;
+  html += `<div class="quick-entry-card quick-entry-calc" onclick="renderDesktopCalc()">`;
+  html += `<div class="quick-entry-header">`;
+  html += `<div class="quick-entry-icon">${calcIcon}</div>`;
+  html += `<div class="quick-entry-text">`;
+  html += `<div class="quick-entry-title">预算计算器</div>`;
+  html += `<div class="quick-entry-desc">精细化预算规划</div>`;
+  html += `</div>`;
+  html += `<div class="quick-entry-arrow">→</div>`;
+  html += `</div>`;
+  html += `<div style="font-size:12px;opacity:0.85;line-height:1.5;position:relative;z-index:1;">经济/标准/奢华三档模式，支持商城选品联动</div>`;
+  html += `</div>`;
+  html += `<div class="quick-entry-card quick-entry-ai" onclick="switchDesktopPage('ai'); setTimeout(()=>sendDesktopAIQuick('如何降低养猫成本'),300);">`;
+  html += `<div class="quick-entry-header">`;
+  html += `<div class="quick-entry-icon">${aiIcon}</div>`;
+  html += `<div class="quick-entry-text">`;
+  html += `<div class="quick-entry-title">AI 养猫顾问</div>`;
+  html += `<div class="quick-entry-desc">省钱妙招咨询</div>`;
+  html += `</div>`;
+  html += `<div class="quick-entry-arrow">→</div>`;
+  html += `</div>`;
+  html += `<div style="font-size:12px;opacity:0.85;line-height:1.5;position:relative;z-index:1;">智能问答 · 猫粮推荐 · 疾病咨询 · 护理指南</div>`;
+  html += `</div>`;
+  html += `</div>`;
+  html += `</div>`;
+  return html;
 }
-function switchLedgerMode(mode) {
+function showModeSwitchModal() {
+  const isOwner = ledgerMode === 'owner';
+  const overlay = document.createElement("div");
+  overlay.className = "publish-modal-overlay";
+  overlay.id = "mode-switch-overlay";
+  overlay.onclick = function(e) { if (e.target === overlay) closeModeSwitchModal(); };
+  overlay.innerHTML = `
+    <div class="publish-modal" style="max-width:420px;border-radius:20px;">
+      <div class="publish-modal-header" style="border-bottom:none;padding-bottom:0;">
+        <h3 style="font-size:18px;">🔄 切换用户模式</h3>
+        <button class="publish-modal-close" onclick="closeModeSwitchModal()">✕</button>
+      </div>
+      <div class="publish-modal-body" style="padding-top:12px;">
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;line-height:1.6;">选择适合你的使用模式，切换后个人主页界面将相应调整。</p>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="mode-select-card ${isOwner?'selected':''}" onclick="selectModeOption('owner')" id="mode-owner">
+            <div style="font-size:28px;margin-right:12px;">🐱</div>
+            <div style="flex:1;">
+              <div style="font-size:15px;font-weight:700;margin-bottom:4px;">铲屎官模式</div>
+              <div style="font-size:12px;color:var(--text-light);line-height:1.5;">已有猫咪，记录养猫生活、健康管理、账本记录</div>
+            </div>
+            <div class="mode-check">✓</div>
+          </div>
+          <div class="mode-select-card ${!isOwner?'selected':''}" onclick="selectModeOption('preparer')" id="mode-preparer">
+            <div style="font-size:28px;margin-right:12px;">🏠</div>
+            <div style="flex:1;">
+              <div style="font-size:15px;font-weight:700;margin-bottom:4px;">准铲屎官模式</div>
+              <div style="font-size:12px;color:var(--text-light);line-height:1.5;">准备养猫，了解养猫知识、预算规划、领养信息</div>
+            </div>
+            <div class="mode-check">✓</div>
+          </div>
+        </div>
+        <button class="publish-submit-btn" style="margin-top:20px;border-radius:12px;" onclick="confirmModeSwitch()">确认切换</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => { overlay.classList.add("show"); });
+}
+function closeModeSwitchModal() {
+  const el = document.getElementById("mode-switch-overlay");
+  if (el) el.remove();
+}
+let selectedMode = ledgerMode;
+function selectModeOption(mode) {
+  selectedMode = mode;
+  document.querySelectorAll('.mode-select-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('mode-' + mode).classList.add('selected');
+}
+function confirmModeSwitch() {
+  closeModeSwitchModal();
+  switchUserMode(selectedMode);
+}
+function switchUserMode(mode) {
   ledgerMode = mode;
-  const menuLabel = document.querySelector('.desktop-menu-item[onclick*="ledger"] span:nth-child(2)');
-  if (menuLabel) menuLabel.textContent = mode === 'owner' ? '养猫账本' : '养猫预备室';
-  const mobileTab = document.querySelector('.profile-content-tab[data-ptab="ledger"]');
-  if (mobileTab) mobileTab.textContent = mode === 'owner' ? '养猫账本' : '养猫预备室';
+  updateModeUI();
   if (window.innerWidth < 1024) {
     renderMobileProfile();
   } else {
-    switchDesktopProfileTab('ledger');
+    const profilePage = document.getElementById('d-page-profile');
+    const isProfileActive = profilePage && profilePage.classList.contains('active');
+    if (isProfileActive) {
+      const activeTab = document.querySelector('.desktop-profile-tab.active');
+      const currentTab = activeTab ? activeTab.dataset.dptab : 'works';
+      switchDesktopProfileTab(currentTab);
+    } else {
+      switchDesktopPage('profile');
+      switchDesktopProfileTab('works');
+    }
   }
+  showToast(mode === 'owner' ? '🐱 已切换到铲屎官模式' : '🏠 已切换到准铲屎官模式');
+}
+function updateModeUI() {
+  const isOwner = ledgerMode === 'owner';
+  const badge = document.getElementById('d-mode-badge');
+  if (badge) {
+    badge.textContent = isOwner ? '🐱 铲屎官' : '🏠 准铲屎官';
+    badge.className = 'mode-badge ' + (isOwner ? 'owner' : 'preparer');
+  }
+  const mBadge = document.getElementById('m-mode-badge');
+  if (mBadge) {
+    mBadge.textContent = isOwner ? '🐱 铲屎官' : '🏠 准铲屎官';
+    mBadge.className = 'mode-badge ' + (isOwner ? 'owner' : 'preparer') + (isOwner ? '' : ' preparer');
+    mBadge.style.cssText = 'font-size:11px;padding:3px 10px;';
+  }
+  const settingsLabel = document.getElementById('settings-mode-label');
+  if (settingsLabel) {
+    settingsLabel.textContent = isOwner ? '🐱 铲屎官' : '🏠 准铲屎官';
+  }
+  const mSettingsLabel = document.getElementById('m-settings-mode-label');
+  if (mSettingsLabel) {
+    mSettingsLabel.textContent = isOwner ? '🐱 铲屎官' : '🏠 准铲屎官';
+  }
+  const menuLabel = document.querySelector('.desktop-profile-tab[data-dptab="ledger"]');
+  if (menuLabel) menuLabel.textContent = isOwner ? '养猫账本' : '养猫预备室';
+  const mobileTab = document.querySelector('.profile-content-tab[data-ptab="ledger"]');
+  if (mobileTab) mobileTab.textContent = isOwner ? '养猫账本' : '养猫预备室';
+  const profileName = document.getElementById('d-profile-name');
+  if (profileName) {
+    profileName.textContent = isOwner ? '铲屎官小王' : '准铲屎官小王';
+  }
+  const mProfileName = document.getElementById('m-profile-name');
+  if (mProfileName) {
+    mProfileName.textContent = isOwner ? '铲屎官小王' : '准铲屎官小王';
+  }
+  const profileId = document.getElementById('d-profile-id');
+  if (profileId) {
+    profileId.textContent = isOwner ? 'ID: catready_2026 · 铲屎官第 128 天' : 'ID: catready_2026 · 已准备养猫 15 天';
+  }
+  const mProfileId = document.getElementById('m-profile-id');
+  if (mProfileId) {
+    mProfileId.textContent = isOwner ? 'ID: catready_2026 · 铲屎官第 128 天' : 'ID: catready_2026 · 已准备养猫 15 天';
+  }
+  const mCatCount = document.getElementById('m-cat-count');
+  if (mCatCount) {
+    mCatCount.textContent = isOwner ? catProfiles.length : '0';
+  }
+  const dCatCount = document.getElementById('d-cat-count');
+  if (dCatCount) {
+    dCatCount.textContent = isOwner ? catProfiles.length : '0';
+  }
+}
+let currentUserProfile = {
+  nickname: '铲屎官小王',
+  bio: '爱猫人士，分享猫咪日常',
+  location: '北京',
+  wechat: '',
+  qq: '',
+  birthday: ''
+};
+function showEditProfileModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'edit-profile-modal-overlay';
+  overlay.id = 'edit-profile-overlay';
+  overlay.innerHTML = `
+    <div class="edit-profile-modal">
+      <div class="edit-profile-header">
+        <div class="edit-profile-title">✏️ 编辑资料</div>
+        <button class="edit-profile-close" onclick="closeEditProfileModal()">×</button>
+      </div>
+      <div class="edit-profile-body">
+        <form class="edit-profile-form" id="edit-profile-form">
+          <div class="edit-profile-item">
+            <label class="edit-profile-label">昵称</label>
+            <input type="text" class="edit-profile-input" id="edit-nickname" value="${currentUserProfile.nickname}" placeholder="请输入昵称">
+          </div>
+          <div class="edit-profile-item">
+            <label class="edit-profile-label">个人简介</label>
+            <textarea class="edit-profile-textarea" id="edit-bio" placeholder="介绍一下自己...">${currentUserProfile.bio}</textarea>
+          </div>
+          <div class="edit-profile-item">
+            <label class="edit-profile-label">所在地</label>
+            <input type="text" class="edit-profile-input" id="edit-location" value="${currentUserProfile.location}" placeholder="城市/地区">
+          </div>
+          <div class="edit-profile-item">
+            <label class="edit-profile-label">微信号</label>
+            <input type="text" class="edit-profile-input" id="edit-wechat" value="${currentUserProfile.wechat}" placeholder="微信号（选填）">
+          </div>
+          <div class="edit-profile-item">
+            <label class="edit-profile-label">QQ号</label>
+            <input type="text" class="edit-profile-input" id="edit-qq" value="${currentUserProfile.qq}" placeholder="QQ号（选填）">
+          </div>
+          <div class="edit-profile-item">
+            <label class="edit-profile-label">生日</label>
+            <input type="date" class="edit-profile-input" id="edit-birthday" value="${currentUserProfile.birthday}">
+          </div>
+        </form>
+      </div>
+      <div class="edit-profile-footer">
+        <button class="edit-profile-btn cancel" onclick="closeEditProfileModal()">取消</button>
+        <button class="edit-profile-btn save" onclick="saveProfileChanges()">保存修改</button>
+      </div>
+    </div>
+  `;
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeEditProfileModal();
+  });
+  document.body.appendChild(overlay);
+}
+function closeEditProfileModal() {
+  const overlay = document.getElementById('edit-profile-overlay');
+  if (overlay) overlay.remove();
+}
+function saveProfileChanges() {
+  const form = document.getElementById('edit-profile-form');
+  const nickname = document.getElementById('edit-nickname').value.trim();
+  const bio = document.getElementById('edit-bio').value.trim();
+  const location = document.getElementById('edit-location').value.trim();
+  const wechat = document.getElementById('edit-wechat').value.trim();
+  const qq = document.getElementById('edit-qq').value.trim();
+  const birthday = document.getElementById('edit-birthday').value;
+  
+  if (!nickname) {
+    showToast('请输入昵称');
+    return;
+  }
+  
+  currentUserProfile = { nickname, bio, location, wechat, qq, birthday };
+  
+  const dProfileName = document.getElementById('d-profile-name');
+  if (dProfileName) dProfileName.textContent = ledgerMode === 'owner' ? nickname : '准' + nickname;
+  
+  const mProfileName = document.getElementById('m-profile-name');
+  if (mProfileName) mProfileName.textContent = ledgerMode === 'owner' ? nickname : '准' + nickname;
+  
+  closeEditProfileModal();
+  showToast('✅ 资料修改成功');
+}
+function showViewProfileModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'view-profile-modal-overlay';
+  overlay.id = 'view-profile-overlay';
+  const isOwner = ledgerMode === 'owner';
+  const profile = currentUserProfile;
+  
+  let bioHtml = profile.bio ? `<div class="view-profile-info"><div class="view-profile-icon bio">📝</div><div><div class="view-profile-label">个人简介</div><div class="view-profile-value">${profile.bio}</div></div></div>` : '';
+  let locationHtml = profile.location ? `<div class="view-profile-info"><div class="view-profile-icon location">📍</div><div><div class="view-profile-label">所在地</div><div class="view-profile-value">${profile.location}</div></div></div>` : '';
+  let wechatHtml = profile.wechat ? `<div class="view-profile-info"><div class="view-profile-icon wechat">💬</div><div><div class="view-profile-label">微信号</div><div class="view-profile-value">${profile.wechat}</div></div></div>` : '';
+  let qqHtml = profile.qq ? `<div class="view-profile-info"><div class="view-profile-icon qq">💻</div><div><div class="view-profile-label">QQ号</div><div class="view-profile-value">${profile.qq}</div></div></div>` : '';
+  let birthdayHtml = profile.birthday ? `<div class="view-profile-info"><div class="view-profile-icon birthday">🎂</div><div><div class="view-profile-label">生日</div><div class="view-profile-value">${profile.birthday}</div></div></div>` : '';
+  
+  overlay.innerHTML = `
+    <div class="view-profile-modal">
+      <div class="view-profile-header">
+        <div class="view-profile-avatar" onclick="closeViewProfileModal();showEditProfileModal();">😺</div>
+        <div class="view-profile-name">${isOwner ? profile.nickname : '准' + profile.nickname}</div>
+        <div class="view-profile-id">ID: catready_2026</div>
+        <div class="view-profile-mode ${isOwner ? 'owner' : 'preparer'}">${isOwner ? '🐱 铲屎官' : '🏠 准铲屎官'}</div>
+      </div>
+      <div class="view-profile-body">
+        ${bioHtml}
+        ${locationHtml}
+        ${wechatHtml}
+        ${qqHtml}
+        ${birthdayHtml}
+        ${(!profile.bio && !profile.location && !profile.wechat && !profile.qq && !profile.birthday) ? '<div style="text-align:center;padding:20px;color:var(--text-light);font-size:14px;">暂无更多资料</div>' : ''}
+      </div>
+      <div class="view-profile-footer">
+        <button class="view-profile-btn close" onclick="closeViewProfileModal()">关闭</button>
+        <button class="view-profile-btn edit" onclick="closeViewProfileModal();showEditProfileModal();">编辑资料</button>
+      </div>
+    </div>
+  `;
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeViewProfileModal();
+  });
+  document.body.appendChild(overlay);
+}
+function closeViewProfileModal() {
+  const overlay = document.getElementById('view-profile-overlay');
+  if (overlay) overlay.remove();
+}
+function switchLedgerMode(mode) {
+  switchUserMode(mode);
+}
+function adoptCat(catId) {
+  const cat = enhancedAdoptCats.find(c => c.id === catId);
+  if (!cat) return;
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0, 10);
+  const birthYear = today.getFullYear() - (parseInt(cat.age) || 1);
+  const birthday = `${birthYear}-01-01`;
+  const newCat = {
+    id: "adopt_" + catId,
+    name: cat.name,
+    avatar: cat.avatar,
+    breed: cat.breed,
+    gender: cat.gender,
+    birthday: birthday,
+    homeDate: todayStr,
+    source: "领养",
+    initialWeight: cat.age.includes("月") ? 1.5 : 4.0,
+    neutered: cat.tags.includes("已绝育") ? "已绝育" : "未绝育",
+    specialTags: cat.tags.filter(t => !["已驱虫", "已绝育", "疫苗齐全"].includes(t)),
+    vaccines: cat.tags.includes("疫苗齐全") ? [
+      { date: `${birthYear}-03-15`, type: "猫三联", dose: 1 },
+      { date: `${birthYear}-04-15`, type: "猫三联", dose: 2 },
+      { date: `${birthYear}-05-15`, type: "猫三联", dose: 3 },
+      { date: `${birthYear}-05-15`, type: "狂犬", dose: 1 }
+    ] : [],
+    dewormings: cat.tags.includes("已驱虫") ? [
+      { date: `${birthYear}-12-01`, type: "内外同驱", brand: "博来恩" }
+    ] : [],
+    vetVisits: [
+      { date: todayStr, hospital: "领养机构", reason: "领养交接", diagnosis: "健康", treatment: "无", cost: 0, severity: "常规" }
+    ],
+    weightRecords: [
+      { date: todayStr, weight: cat.age.includes("月") ? 1.5 : 4.0, scene: "领养交接" }
+    ],
+    milestones: [
+      { date: todayStr, title: "到家第一天", description: `从${cat.location}领养回家`, cover: "🏠", preset: true }
+    ],
+    timeline: [
+      { id: "adopt_t1", type: "milestone", date: todayStr, title: "到家第一天", content: `从${cat.location}领养回家，欢迎${cat.name}加入家庭！`, photos: [], tags: ["领养"], likes: 0, comments: 0, milestone: true, visibility: "公开" }
+    ]
+  };
+  catProfiles.unshift(newCat);
+  currentCatId = newCat.id;
+  switchUserMode('owner');
+  showToast(`🎉 恭喜领养成功！${cat.name}的档案已导入`);
 }
 function togglePrepCheckItem(id) {
   if (prepCheckedItems.has(id)) { prepCheckedItems.delete(id); } else { prepCheckedItems.add(id); }
@@ -2695,10 +4325,43 @@ function togglePrepCheckItem(id) {
 function renderPrepRoom(platform) {
   const isMobile = platform === 'mobile';
   const checkedTotal = [...prepCheckedItems].reduce((s, id) => { const item = prepChecklist.find(p => p.id === id); return s + (item ? item.avgPrice : 0); }, 0);
-  const switchHtml = renderModeSwitch(false);
-  let html = `<div class="${isMobile ? '' : 'desktop-ledger-mode-switch'}">${switchHtml}</div>`;
+  let html = '';
+  const calcIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>';
+  const aiIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>';
+  const calcFn = isMobile ? 'showMobileCalc()' : 'renderDesktopCalc()';
+  const aiFn = isMobile ? 'openPrepAIChat()' : 'switchDesktopPage(\'ai\'); setTimeout(()=>sendDesktopAIQuick(\'接猫前需要准备什么\'),300);';
+  
+  if (isMobile) {
+    html += `<div class="mobile-quick-entries">`;
+    html += `<div class="quick-entry-card quick-entry-calc" onclick="${calcFn}">`;
+    html += `<div class="quick-entry-header">`;
+    html += `<div class="quick-entry-icon">${calcIcon}</div>`;
+    html += `<div class="quick-entry-text">`;
+    html += `<div class="quick-entry-title">预算计算器</div>`;
+    html += `<div class="quick-entry-desc">三档模式规划</div>`;
+    html += `</div>`;
+    html += `<div class="quick-entry-arrow">→</div>`;
+    html += `</div>`;
+    html += `</div>`;
+    html += `<div class="quick-entry-card quick-entry-ai" onclick="${aiFn}">`;
+    html += `<div class="quick-entry-header">`;
+    html += `<div class="quick-entry-icon">${aiIcon}</div>`;
+    html += `<div class="quick-entry-text">`;
+    html += `<div class="quick-entry-title">AI 养猫顾问</div>`;
+    html += `<div class="quick-entry-desc">接猫准备咨询</div>`;
+    html += `</div>`;
+    html += `<div class="quick-entry-arrow">→</div>`;
+    html += `</div>`;
+    html += `</div>`;
+    html += `</div>`;
+  }
   // 费用总览
   html += `<div class="prep-summary-bar"><div class="prep-summary-item"><div class="prep-summary-value">¥${checkedTotal.toLocaleString()}</div><div class="prep-summary-label">已选物品费用</div></div><div class="prep-summary-item"><div class="prep-summary-value">¥300-1,500</div><div class="prep-summary-label">预估月度开支</div></div><div class="prep-summary-item"><div class="prep-summary-value">¥${(checkedTotal+300).toLocaleString()}+</div><div class="prep-summary-label">首月预计总花费</div></div></div>`;
+  
+  if (!isMobile) {
+    html += `<div style="display:flex;gap:20px;align-items:flex-start;">`;
+    html += `<div style="flex:1;min-width:0;">`;
+  }
   // 一次性初始费用
   const initCosts = [
     { emoji: '🚽', name: '猫砂盆', range: '¥50-200' },
@@ -2725,9 +4388,34 @@ function renderPrepRoom(platform) {
   html += `<div style="margin-top:12px;padding-top:12px;border-top:2px solid var(--border);display:flex;justify-content:space-between;font-size:14px;"><span>已选 ${prepCheckedItems.size}/${prepChecklist.length} 件</span><span style="font-weight:700;color:var(--primary);">约 ¥${checkedTotal}</span></div></div>`;
   // 小贴士
   html += `<div class="prep-tip-card" style="background:var(--primary-light);">💡 <strong>准铲屎官小贴士：</strong>建议先按"必需"物品准备，等猫咪到家适应后再逐步添置"建议"和"可选"物品。封窗是最重要的安全投资，一定不要省！</div>`;
-  // 底部按钮
-  if (isMobile) {
-    html += `<div style="padding:0 16px 16px;"><button class="profile-action-btn primary" style="width:100%;margin-bottom:8px;" onclick="showMobileCalc()">🧮 预算计算器</button><button class="profile-action-btn" style="width:100%;" onclick="openPrepAIChat()">🤖 咨询 AI 养猫顾问</button></div>`;
+  
+  if (!isMobile) {
+    html += `</div>`;
+    html += `<div style="width:260px;flex-shrink:0;display:flex;flex-direction:column;gap:16px;position:sticky;top:20px;">`;
+    html += `<div class="quick-entry-card quick-entry-calc" onclick="${calcFn}">`;
+    html += `<div class="quick-entry-header">`;
+    html += `<div class="quick-entry-icon">${calcIcon}</div>`;
+    html += `<div class="quick-entry-text">`;
+    html += `<div class="quick-entry-title">预算计算器</div>`;
+    html += `<div class="quick-entry-desc">精细化预算规划</div>`;
+    html += `</div>`;
+    html += `<div class="quick-entry-arrow">→</div>`;
+    html += `</div>`;
+    html += `<div style="font-size:12px;opacity:0.85;line-height:1.5;position:relative;z-index:1;">经济/标准/奢华三档模式，支持商城选品联动</div>`;
+    html += `</div>`;
+    html += `<div class="quick-entry-card quick-entry-ai" onclick="${aiFn}">`;
+    html += `<div class="quick-entry-header">`;
+    html += `<div class="quick-entry-icon">${aiIcon}</div>`;
+    html += `<div class="quick-entry-text">`;
+    html += `<div class="quick-entry-title">AI 养猫顾问</div>`;
+    html += `<div class="quick-entry-desc">接猫准备咨询</div>`;
+    html += `</div>`;
+    html += `<div class="quick-entry-arrow">→</div>`;
+    html += `</div>`;
+    html += `<div style="font-size:12px;opacity:0.85;line-height:1.5;position:relative;z-index:1;">智能问答 · 猫粮推荐 · 疾病咨询 · 护理指南</div>`;
+    html += `</div>`;
+    html += `</div>`;
+    html += `</div>`;
   }
   return html;
 }
@@ -3005,11 +4693,14 @@ function filterPickerSearch(keyword, category) {
 function renderDesktopCalc() {
   const container = document.getElementById("d-profile-tab-content");
   let html = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;"><span style="font-size:18px;cursor:pointer;color:var(--text-secondary);" onclick="switchDesktopProfileTab('ledger')">← 返回</span><h2 style="font-size:17px;font-weight:700;margin:0;">🧮 预算计算器</h2></div>`;
-  html += renderModeSwitch(true);
-  html += `<div class="calc-desktop-container"><div class="calc-desktop-items"><div class="calc-tabs-m" style="position:static;margin-bottom:16px;"><button class="calc-tab-m ${currentCalcMode==='economy'?'active':''}" onclick="switchDesktopCalcMode('economy',this)"><div class="tab-name">经济模式</div><div class="tab-price">~300</div></button><button class="calc-tab-m ${currentCalcMode==='standard'?'active':''}" onclick="switchDesktopCalcMode('standard',this)"><div class="tab-name">标准模式</div><div class="tab-price">~800</div></button><button class="calc-tab-m ${currentCalcMode==='premium'?'active':''}" onclick="switchDesktopCalcMode('premium',this)"><div class="tab-name">奢华模式</div><div class="tab-price">~1500</div></button></div><div class="calc-mode-switch-global" style="margin:0 0 16px 0;max-width:360px;"><button class="mode-btn ${currentCalcDisplayMode==='estimate'?'active':''}" onclick="switchCalcDisplayMode('estimate')">📊 粗略估值</button><button class="mode-btn ${currentCalcDisplayMode==='detail'?'active':''}" onclick="switchCalcDisplayMode('detail')">🛒 详细选品</button></div><div id="d-calc-items"></div></div><div class="calc-desktop-cart"><div style="font-size:16px;font-weight:700;margin-bottom:16px;">🛒 预算清单</div><div id="d-cart-content"></div></div></div>`;
+  html += `<div class="calc-desktop-container"><div class="calc-desktop-items"><div class="calc-desktop-tabs"><button class="bubble-tab economy ${currentCalcMode==='economy'?'active':''}" onclick="switchDesktopCalcMode('economy',this)"><div class="tab-name">经济模式</div><div class="tab-price">~300</div></button><button class="bubble-tab standard ${currentCalcMode==='standard'?'active':''}" onclick="switchDesktopCalcMode('standard',this)"><div class="tab-name">标准模式</div><div class="tab-price">~800</div></button><button class="bubble-tab premium ${currentCalcMode==='premium'?'active':''}" onclick="switchDesktopCalcMode('premium',this)"><div class="tab-name">奢华模式</div><div class="tab-price">~1500</div></button></div><div class="calc-mode-switch-global" style="margin:0 0 16px 0;max-width:360px;"><button class="mode-btn ${currentCalcDisplayMode==='estimate'?'active':''}" onclick="switchCalcDisplayMode('estimate')">📊 粗略估值</button><button class="mode-btn ${currentCalcDisplayMode==='detail'?'active':''}" onclick="switchCalcDisplayMode('detail')">🛒 详细选品</button></div><div id="d-calc-items"></div></div><div class="calc-desktop-cart"><div style="font-size:16px;font-weight:700;margin-bottom:16px;">🛒 预算清单</div><div id="d-cart-content"></div></div></div>`;
   container.innerHTML = html;
   renderDesktopCalcItems();
   updateDesktopCart();
+}
+
+function switchDesktopCalc() {
+  renderDesktopCalc();
 }
 
 function switchDesktopCalcMode(mode, btn) {
@@ -3018,7 +4709,7 @@ function switchDesktopCalcMode(mode, btn) {
   budgetCart = {};
   itemDisplayModes = {};
   if (btn) {
-    document.querySelectorAll("#d-calc-items .calc-tab-m").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".bubble-tab").forEach(t => t.classList.remove("active"));
     btn.classList.add("active");
   }
   renderDesktopCalcItems();
@@ -3297,7 +4988,7 @@ function renderDesktopHot() {
 function renderDesktopAdoptDetail() {
   const container = document.getElementById("d-community-content");
   let html = `<div class="desktop-adopt-banner"><h3>🏠 用爱终止流浪</h3><p>领养代替购买，给流浪猫咪一个温暖的家</p><div class="adopt-action-btns"><button class="adopt-action-btn primary" onclick="openPublishModal('adopt-seek')">我要领养</button><button class="adopt-action-btn secondary" onclick="openPublishModal('adopt-give')">发布送养</button></div></div><div class="desktop-adopt-grid">`;
-  html += enhancedAdoptCats.map(c => `<div class="desktop-card" style="overflow:hidden;"><div style="width:100%;aspect-ratio:16/10;background:linear-gradient(135deg,var(--primary-light),#FFF5EE);display:flex;align-items:center;justify-content:center;font-size:64px;">${c.avatar}</div><div style="padding:14px;"><div style="display:flex;align-items:center;justify-content:space-between;"><div style="font-size:16px;font-weight:700;">${c.name} · ${c.breed}</div><div class="adopt-level-badge ${c.level}">${c.levelText}</div></div><div style="font-size:12px;color:var(--text-light);margin-top:4px;">${c.gender} · ${c.age} · 📍 ${c.location}</div><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">${c.tags.map(t=>`<span style="padding:2px 8px;border-radius:6px;font-size:11px;background:#E8F5E9;color:#2E7D32;">${t}</span>`).join('')}</div><div style="font-size:13px;color:var(--text-secondary);line-height:1.5;margin-top:8px;">${c.desc}</div><button style="width:100%;padding:10px;margin-top:12px;border:none;border-radius:100px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(255,140,66,0.25);" onclick="showToast('已提交领养申请')">申请领养</button></div></div>`).join("");
+  html += enhancedAdoptCats.map(c => `<div class="desktop-card" style="overflow:hidden;"><div style="width:100%;aspect-ratio:16/10;background:linear-gradient(135deg,var(--primary-light),#FFF5EE);display:flex;align-items:center;justify-content:center;font-size:64px;">${c.avatar}</div><div style="padding:14px;"><div style="display:flex;align-items:center;justify-content:space-between;"><div style="font-size:16px;font-weight:700;">${c.name} · ${c.breed}</div><div class="adopt-level-badge ${c.level}">${c.levelText}</div></div><div style="font-size:12px;color:var(--text-light);margin-top:4px;">${c.gender} · ${c.age} · 📍 ${c.location}</div><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">${c.tags.map(t=>`<span style="padding:2px 8px;border-radius:6px;font-size:11px;background:#E8F5E9;color:#2E7D32;">${t}</span>`).join('')}</div><div style="font-size:13px;color:var(--text-secondary);line-height:1.5;margin-top:8px;">${c.desc}</div><button style="width:100%;padding:10px;margin-top:12px;border:none;border-radius:100px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(255,140,66,0.25);" onclick="adoptCat('${c.id}')">确认领养</button></div></div>`).join("");
   html += "</div>";
   container.innerHTML = html;
 }
@@ -3313,6 +5004,9 @@ function renderDesktopKnowledgeDetail() {
 function switchDesktopKnowledgeCat(cat) { currentKnowledgeCat = cat; renderDesktopKnowledgeDetail(); }
 function switchDesktopProfileTab(tab) {
   const container = document.getElementById("d-profile-tab-content");
+  document.querySelectorAll('.desktop-profile-tab').forEach(t => t.classList.remove('active'));
+  const activeTab = document.querySelector(`.desktop-profile-tab[data-dptab="${tab}"]`);
+  if (activeTab) activeTab.classList.add('active');
   if (tab === "works") {
     container.innerHTML = '<div class="desktop-works-grid">' + videoFeedData.slice(0, 6).map(v => `<div class="desktop-work-item"><div class="desktop-work-img">${v.emoji}</div><div class="desktop-work-info"><div style="font-size:14px;font-weight:600;line-height:1.4;">${v.text.substring(0,30)}...</div><div style="font-size:12px;color:var(--text-light);margin-top:6px;">❤️ ${v.likes} · 💬 ${v.comments}</div></div></div>`).join("") + "</div>";
   } else if (tab === "cats") {
@@ -3321,9 +5015,37 @@ function switchDesktopProfileTab(tab) {
     if (ledgerMode === 'preparer') {
       container.innerHTML = renderPrepRoom('desktop');
     } else {
-      renderDesktopCalc();
+      container.innerHTML = renderDesktopLedger();
     }
-    return;
+  } else if (tab === "ai") {
+    container.innerHTML = `<div class="desktop-card" style="padding:24px;cursor:pointer;" onclick="switchDesktopPage('ai')">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">
+        <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--primary-light),#FFF5EE);display:flex;align-items:center;justify-content:center;font-size:32px;">🐱</div>
+        <div style="flex:1;">
+          <div style="font-size:18px;font-weight:700;margin-bottom:4px;">喵记 AI 顾问</div>
+          <div style="font-size:13px;color:var(--text-light);">预算估算 · 猫粮推荐 · 医学知识 · 护理指南</div>
+        </div>
+        <div style="font-size:24px;color:var(--text-light);">›</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+        <div style="padding:14px;border-radius:10px;background:var(--bg);text-align:center;">
+          <div style="font-size:20px;margin-bottom:4px;">💰</div>
+          <div style="font-size:12px;font-weight:500;">预算估算</div>
+        </div>
+        <div style="padding:14px;border-radius:10px;background:var(--bg);text-align:center;">
+          <div style="font-size:20px;margin-bottom:4px;">🍖</div>
+          <div style="font-size:12px;font-weight:500;">猫粮推荐</div>
+        </div>
+        <div style="padding:14px;border-radius:10px;background:var(--bg);text-align:center;">
+          <div style="font-size:20px;margin-bottom:4px;">💉</div>
+          <div style="font-size:12px;font-weight:500;">疫苗时间</div>
+        </div>
+        <div style="padding:14px;border-radius:10px;background:var(--bg);text-align:center;">
+          <div style="font-size:20px;margin-bottom:4px;">🏥</div>
+          <div style="font-size:12px;font-weight:500;">疾病咨询</div>
+        </div>
+      </div>
+    </div>`;
   } else if (tab === "groups") {
     container.innerHTML = '<div class="desktop-card" style="padding:16px;">' + contacts.groups.map(g => `<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);"><div style="width:40px;height:40px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:18px;">${g.avatar}</div><div style="flex:1;"><div style="font-size:14px;font-weight:600;">${g.name}</div><div style="font-size:12px;color:var(--text-light);">${g.desc}</div></div></div>`).join("") + "</div>";
   } else if (tab === "fav") {
@@ -3344,7 +5066,8 @@ function switchDesktopPage(pageName) {
   document.querySelectorAll(".desktop-page").forEach(p => p.classList.remove("active"));
   const item = document.querySelector(`.sidebar-item[data-page="${pageName}"]`);
   if (item) item.classList.add("active");
-  document.getElementById("d-page-" + pageName).classList.add("active");
+  const page = document.getElementById("d-page-" + pageName);
+  if (page) page.classList.add("active");
 }
 function openPublishModal(type) {
   document.getElementById("m-fab-panel").classList.remove("show");
@@ -3432,6 +5155,17 @@ function getLatestWeight(weightRecords) {
   return weightRecords[weightRecords.length - 1].weight + "kg";
 }
 function renderMobileCatProfile() {
+  if (ledgerMode === 'preparer') {
+    return `<div style="padding:40px 20px;text-align:center;background:var(--card-bg);">
+      <div style="font-size:56px;margin-bottom:12px;">🐾</div>
+      <h3 style="font-size:16px;font-weight:600;margin-bottom:6px;">还没有猫咪档案</h3>
+      <p style="font-size:13px;color:var(--text-light);margin-bottom:20px;line-height:1.5;">领养一只猫咪，开始记录它的成长吧<br>或者先去养猫预备室做好准备工作</p>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+        <button class="cat-action-btn primary" onclick="switchMobileScreen('home')">🏠 去领养</button>
+        <button class="cat-action-btn secondary" onclick="currentProfileTab='ledger';renderMobileProfile();">📋 预备室</button>
+      </div>
+    </div>`;
+  }
   const cat = catProfiles.find(c => c.id === currentCatId);
   if (!cat) return "";
   const nextVac = calculateNextVaccine(cat.vaccines);
@@ -3448,10 +5182,21 @@ function renderMobileCatProfile() {
   html += `<div class="cat-health-card ${healthWarn?'warning':''}"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><div><div style="font-size:14px;font-weight:600;">🏥 健康综合评估</div><div style="font-size:11px;color:var(--text-light);">基于疫苗、驱虫、体重、体检记录</div></div><div class="cat-health-score ${healthWarn?'warning':''}">${healthScore}<span style="font-size:14px;font-weight:400;">/100</span></div></div><div class="cat-health-detail"><div class="cat-health-item ${nextVac?'good':'warn'}"><div class="health-val">${nextVac?'✓':'⚠️'}</div><div class="health-label">疫苗</div></div><div class="cat-health-item ${nextDew?'good':'warn'}"><div class="health-val">${nextDew?'✓':'⚠️'}</div><div class="health-label">驱虫</div></div><div class="cat-health-item good"><div class="health-val">${latestWeight}</div><div class="health-label">体重</div></div><div class="cat-health-item ${cat.neutered.includes('已')?'good':'warn'}"><div class="health-val">${cat.neutered.includes('已')?'✓':'⚠️'}</div><div class="health-label">绝育</div></div></div></div>`;
   html += `<div class="cat-record-row"><button class="cat-record-btn" onclick="openRecordModal('photo')"><span class="rec-icon">📸</span><span class="rec-label">拍一张</span></button><button class="cat-record-btn" onclick="openRecordModal('weight')"><span class="rec-icon">⚖️</span><span class="rec-label">称体重</span></button><button class="cat-record-btn" onclick="openRecordModal('vaccine')"><span class="rec-icon">💉</span><span class="rec-label">打疫苗</span></button><button class="cat-record-btn" onclick="openRecordModal('deworm')"><span class="rec-icon">💊</span><span class="rec-label">驱虫</span></button><button class="cat-record-btn" onclick="openRecordModal('vet')"><span class="rec-icon">🏥</span><span class="rec-label">去医院</span></button><button class="cat-record-btn" onclick="openRecordModal('food')"><span class="rec-icon">🍖</span><span class="rec-label">换粮</span></button><button class="cat-record-btn" onclick="openRecordModal('diary')"><span class="rec-icon">✏️</span><span class="rec-label">写日记</span></button><button class="cat-record-btn" onclick="openRecordModal('milestone')"><span class="rec-icon">🏷️</span><span class="rec-label">里程碑</span></button></div>`;
   html += renderTimeline(cat, currentTimelineFilter);
-  html += `<div style="padding:12px 16px;display:flex;gap:10px;"><button class="profile-action-btn primary" style="flex:1;" onclick="openShareModal()">分享档案</button><button class="profile-action-btn" style="flex:1;" onclick="openEditCatModal()">编辑信息</button></div>`;
+  html += `<div style="padding:12px 16px;display:flex;gap:10px;"><button class="cat-action-btn primary" style="flex:1;" onclick="openShareModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>分享档案</button><button class="cat-action-btn secondary" style="flex:1;" onclick="openEditCatModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>编辑信息</button></div>`;
   return html;
 }
 function renderDesktopCatProfile() {
+  if (ledgerMode === 'preparer') {
+    return `<div style="background:var(--card-bg);border-radius:12px;padding:40px 20px;border:1px solid var(--border);text-align:center;">
+      <div style="font-size:64px;margin-bottom:16px;">🐾</div>
+      <h3 style="font-size:18px;font-weight:600;margin-bottom:8px;">还没有猫咪档案</h3>
+      <p style="font-size:14px;color:var(--text-light);margin-bottom:24px;line-height:1.6;">领养一只猫咪，开始记录它的成长吧<br>或者先去养猫预备室做好准备工作</p>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button class="cat-action-btn primary" onclick="switchDesktopPage('adopt')">🏠 去领养专区</button>
+        <button class="cat-action-btn secondary" onclick="switchDesktopProfileTab('ledger')">📋 养猫预备室</button>
+      </div>
+    </div>`;
+  }
   const cat = catProfiles.find(c => c.id === currentCatId);
   if (!cat) return "";
   const nextVac = calculateNextVaccine(cat.vaccines);
@@ -3464,7 +5209,7 @@ function renderDesktopCatProfile() {
   html += `<div style="background:var(--card-bg);border-radius:12px;padding:20px;border:1px solid var(--border);margin-bottom:16px;text-align:center;"><div style="font-size:40px;margin-bottom:8px;">${cat.avatar}</div><div style="font-size:20px;font-weight:700;">${cat.name} · ${cat.breed}</div><div style="font-size:14px;color:var(--text-light);margin-top:6px;">${ageText} · ${cat.gender} · ${cat.neutered}</div><div style="margin-top:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">${cat.specialTags.map(t=>`<span class="badge-m badge-red">${t}</span>`).join("")}</div></div>`;
   html += `<div class="cat-info-bar" style="border-radius:12px;border:1px solid var(--border);margin-bottom:16px;"><div class="cat-info-cell"><div class="info-val">${latestWeight}</div><div class="info-label">最新体重</div></div><div class="cat-info-cell"><div class="info-val">${nextVac?nextVac:"--"}</div><div class="info-label">下次疫苗</div>${vacAlert?`<div class="info-alert ${vacAlert.cls}">${vacAlert.text}</div>`:""}</div><div class="cat-info-cell"><div class="info-val">${nextDew?nextDew:"--"}</div><div class="info-label">下次驱虫</div>${dewAlert?`<div class="info-alert ${dewAlert.cls}">${dewAlert.text}</div>`:""}</div><div class="cat-info-cell"><div class="info-val">${cat.neutered}</div><div class="info-label">绝育状态</div></div></div>`;
   html += `<div class="cat-record-row" style="border-radius:12px;border:1px solid var(--border);margin-bottom:16px;"><button class="cat-record-btn" onclick="openRecordModal('photo')"><span class="rec-icon">📸</span><span class="rec-label">拍一张</span></button><button class="cat-record-btn" onclick="openRecordModal('weight')"><span class="rec-icon">⚖️</span><span class="rec-label">称体重</span></button><button class="cat-record-btn" onclick="openRecordModal('vaccine')"><span class="rec-icon">💉</span><span class="rec-label">打疫苗</span></button><button class="cat-record-btn" onclick="openRecordModal('deworm')"><span class="rec-icon">💊</span><span class="rec-label">驱虫</span></button><button class="cat-record-btn" onclick="openRecordModal('vet')"><span class="rec-icon">🏥</span><span class="rec-label">去医院</span></button><button class="cat-record-btn" onclick="openRecordModal('food')"><span class="rec-icon">🍖</span><span class="rec-label">换粮</span></button><button class="cat-record-btn" onclick="openRecordModal('diary')"><span class="rec-icon">✏️</span><span class="rec-label">写日记</span></button><button class="cat-record-btn" onclick="openRecordModal('milestone')"><span class="rec-icon">🏷️</span><span class="rec-label">里程碑</span></button></div>`;
-  html += `<div style="display:flex;gap:10px;margin-bottom:16px;"><button class="profile-action-btn primary" style="flex:1;padding:10px;" onclick="openShareModal()">分享档案</button><button class="profile-action-btn" style="flex:1;padding:10px;" onclick="openEditCatModal()">编辑信息</button></div>`;
+  html += `<div style="display:flex;gap:10px;margin-bottom:16px;"><button class="cat-action-btn primary" style="flex:1;" onclick="openShareModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>分享档案</button><button class="cat-action-btn secondary" style="flex:1;" onclick="openEditCatModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>编辑信息</button></div>`;
   html += renderTimeline(cat, currentTimelineFilter);
   html += `</div></div>`;
   return html;
@@ -3796,6 +5541,7 @@ function init() {
   renderDesktopHot();
   const welcome = `<div class="desktop-ai-welcome"><h4>🐱 你好！我是你的专属养猫顾问</h4><p>我可以帮你：</p><ul><li>💰 根据预算制定养猫方案</li><li>🍖 推荐合适的猫粮品牌</li><li>🏥 解答猫咪疾病和护理问题</li><li>🐱 推荐适合你的猫咪品种</li></ul><div class="desktop-quick-grid"><button class="desktop-quick-btn qb-orange" onclick="sendDesktopAIQuick('帮我估算养猫预算')">💰 预算估算</button><button class="desktop-quick-btn qb-green" onclick="sendDesktopAIQuick('推荐适合新手的猫粮')">🍖 猫粮推荐</button><button class="desktop-quick-btn qb-blue" onclick="sendDesktopAIQuick('猫咪疫苗时间表')">💉 疫苗时间</button><button class="desktop-quick-btn qb-red" onclick="sendDesktopAIQuick('猫癣怎么处理')">🔴 猫癣处理</button></div></div>`;
   document.getElementById("d-ai-messages").innerHTML = `<div class="desktop-ai-msg-row fade-in"><div class="desktop-ai-msg-avatar">🐱</div><div class="ai-bubble-d bot">${welcome}</div></div>`;
+  updateModeUI();
 }
 init();
 document.querySelectorAll("#app-mobile .nav-item[data-screen]").forEach(item => {
@@ -3811,7 +5557,7 @@ document.querySelectorAll(".profile-content-tab").forEach(tab => {
   tab.addEventListener("click", () => { document.querySelectorAll(".profile-content-tab").forEach(t => t.classList.remove("active")); tab.classList.add("active"); currentProfileTab = tab.dataset.ptab; renderMobileProfile(); });
 });
 document.querySelectorAll(".sidebar-item").forEach(item => {
-  item.addEventListener("click", () => { const pageName = item.dataset.page; if (pageName === "settings") { showToast("设置页面开发中"); return; } switchDesktopPage(pageName); });
+  item.addEventListener("click", () => { const pageName = item.dataset.page; switchDesktopPage(pageName); });
 });
 document.querySelectorAll(".header-tab").forEach(tab => {
   tab.addEventListener("click", () => { document.querySelectorAll(".header-tab").forEach(t => t.classList.remove("active")); tab.classList.add("active"); const tabName = tab.dataset.dtab; if (tabName) { currentDesktopHomeTab = tabName; renderDesktopHome(tabName); } });
