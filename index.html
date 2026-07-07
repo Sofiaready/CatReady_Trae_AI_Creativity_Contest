@@ -2822,7 +2822,7 @@ body {
         <div class="profile-avatar-m" onclick="showViewProfileModal()" style="cursor:pointer;">😺</div>
         <div>
           <div style="display:flex;align-items:center;gap:8px;">
-            <div class="profile-name-m" id="m-profile-name">准铲屎官小王</div>
+            <div class="profile-name-m" id="m-profile-name">喵记体验官</div>
             <span class="mode-badge preparer" id="m-mode-badge" onclick="showModeSwitchModal()" style="font-size:11px;padding:3px 10px;">🏠 准铲屎官</span>
           </div>
           <div class="profile-id-m" id="m-profile-id">ID: catready_2026 · 已准备养猫 15 天</div>
@@ -3103,7 +3103,7 @@ body {
         <div class="desktop-profile-avatar" onclick="showViewProfileModal()" style="cursor:pointer;">😺</div>
         <div style="flex:1;">
           <div style="display:flex;align-items:center;gap:10px;">
-            <div class="desktop-profile-name" id="d-profile-name">准铲屎官小王</div>
+            <div class="desktop-profile-name" id="d-profile-name">喵记体验官</div>
             <span class="mode-badge" id="d-mode-badge" onclick="showModeSwitchModal()">🏠 准铲屎官</span>
           </div>
           <div class="desktop-profile-id" id="d-profile-id">ID: catready_2026 · 已准备养猫 15 天</div>
@@ -3142,6 +3142,12 @@ body {
   </div>
 </div>
 <script>
+
+// 全局默认配置
+const DEFAULT_APP_CONFIG = {
+  OWNER_DEFAULT_NAME: "喵记体验官",
+  PICKER_DEFAULT_NAME: "喵记体验官"
+};
 
 const videoFeedData = [
   { id: 1, emoji: "🐱", author: "喵星人日记", avatar: "😺", text: "我家主子今天第一次学会握手！花了三周时间终于教会了，大家有什么训练技巧可以分享吗？", music: "原创音乐 - 喵星人日记", likes: 1245, comments: 89, favorites: 234, shares: 56 },
@@ -3683,6 +3689,9 @@ const enhancedKnowledge = [
 ];
 let currentMsgTab = "interaction";
 let currentProfileTab = "works";
+// 新增：记录桌面端和移动端的个人主页是否已经进行过首次内容渲染
+let hasDesktopProfileLoaded = false;
+let hasMobileProfileLoaded = false;
 let currentActiveGroup = "british";
 let currentKnowledgeCat = "新手入门";
 /* currentCatId 已在上方声明 */
@@ -4072,6 +4081,11 @@ function confirmModeSwitch() {
 }
 function switchUserMode(mode) {
   ledgerMode = mode;
+  // 如果用户没有在 localStorage 中自定义过名字，才根据新角色赋予对应默认名
+  if (!localStorage.getItem("custom_user_name")) {
+    const defaultName = mode === 'owner' ? DEFAULT_APP_CONFIG.OWNER_DEFAULT_NAME : DEFAULT_APP_CONFIG.PICKER_DEFAULT_NAME;
+    currentUserProfile.nickname = defaultName;
+  }
   updateModeUI();
   if (window.innerWidth < 1024) {
     renderMobileProfile();
@@ -4116,11 +4130,11 @@ function updateModeUI() {
   if (mobileTab) mobileTab.textContent = isOwner ? '养猫账本' : '养猫预备室';
   const profileName = document.getElementById('d-profile-name');
   if (profileName) {
-    profileName.textContent = isOwner ? '铲屎官小王' : '准铲屎官小王';
+    profileName.textContent = currentUserProfile.nickname;
   }
   const mProfileName = document.getElementById('m-profile-name');
   if (mProfileName) {
-    mProfileName.textContent = isOwner ? '铲屎官小王' : '准铲屎官小王';
+    mProfileName.textContent = currentUserProfile.nickname;
   }
   const profileId = document.getElementById('d-profile-id');
   if (profileId) {
@@ -4140,7 +4154,7 @@ function updateModeUI() {
   }
 }
 let currentUserProfile = {
-  nickname: '铲屎官小王',
+  nickname: '喵记体验官',
   bio: '爱猫人士，分享猫咪日常',
   location: '北京',
   wechat: '',
@@ -4195,6 +4209,11 @@ function showEditProfileModal() {
     if (e.target === overlay) closeEditProfileModal();
   });
   document.body.appendChild(overlay);
+
+  // 确保弹窗打开时，输入框显示当前最新的名字
+  const currentName = document.getElementById("m-profile-name") ? document.getElementById("m-profile-name").innerText : "";
+  const inputEl = document.getElementById("edit-nickname");
+  if (inputEl && currentName) inputEl.value = currentName;
 }
 function closeEditProfileModal() {
   const overlay = document.getElementById('edit-profile-overlay');
@@ -4215,13 +4234,16 @@ function saveProfileChanges() {
   }
   
   currentUserProfile = { nickname, bio, location, wechat, qq, birthday };
-  
+
+  // 新增：将新名字持久化保存到本地
+  localStorage.setItem("custom_user_name", nickname);
+
   const dProfileName = document.getElementById('d-profile-name');
   if (dProfileName) dProfileName.textContent = ledgerMode === 'owner' ? nickname : '准' + nickname;
-  
+
   const mProfileName = document.getElementById('m-profile-name');
   if (mProfileName) mProfileName.textContent = ledgerMode === 'owner' ? nickname : '准' + nickname;
-  
+
   closeEditProfileModal();
   showToast('✅ 资料修改成功');
 }
@@ -5058,7 +5080,14 @@ function switchMobileScreen(screenName) {
   document.getElementById("m-screen-" + screenName).classList.add("active");
   const navItem = document.querySelector(`#app-mobile .nav-item[data-screen="${screenName}"]`);
   if (navItem) navItem.classList.add("active");
-  if (screenName === "profile") renderMobileProfile();
+
+  // ======= 优化移动端：避免每次点击底部导航都强制重绘整个主页 DOM =======
+  if (screenName === "profile") {
+    if (!hasMobileProfileLoaded) {
+      renderMobileProfile();
+      hasMobileProfileLoaded = true; // 仅在第一次切换到"我的"时渲染
+    }
+  }
   if (screenName === "msg") renderMobileMessages();
 }
 function switchDesktopPage(pageName) {
@@ -5068,6 +5097,16 @@ function switchDesktopPage(pageName) {
   if (item) item.classList.add("active");
   const page = document.getElementById("d-page-" + pageName);
   if (page) page.classList.add("active");
+
+  // ======= 修复桌面端：首次进入个人主页自动加载内容 =======
+  if (pageName === "profile") {
+    if (!hasDesktopProfileLoaded) {
+      const activeTab = document.querySelector('.desktop-profile-tab.active');
+      const currentTab = activeTab ? activeTab.dataset.dptab : 'works';
+      switchDesktopProfileTab(currentTab);
+      hasDesktopProfileLoaded = true; // 标记已加载，后续反复点击侧边栏不再重复渲染
+    }
+  }
 }
 function openPublishModal(type) {
   document.getElementById("m-fab-panel").classList.remove("show");
@@ -5530,6 +5569,14 @@ function closeCatModal() {
 }
 
 function init() {
+  // 先读取 localStorage，仅同步到 currentUserProfile（供后续 updateModeUI 等渲染函数使用）
+  const savedName = localStorage.getItem("custom_user_name");
+  if (savedName) {
+    currentUserProfile.nickname = savedName;
+  } else {
+    currentUserProfile.nickname = DEFAULT_APP_CONFIG.OWNER_DEFAULT_NAME;
+  }
+
   renderMobileHome("recommend");
   renderTopics();
   renderGroupList();
@@ -5542,6 +5589,12 @@ function init() {
   const welcome = `<div class="desktop-ai-welcome"><h4>🐱 你好！我是你的专属养猫顾问</h4><p>我可以帮你：</p><ul><li>💰 根据预算制定养猫方案</li><li>🍖 推荐合适的猫粮品牌</li><li>🏥 解答猫咪疾病和护理问题</li><li>🐱 推荐适合你的猫咪品种</li></ul><div class="desktop-quick-grid"><button class="desktop-quick-btn qb-orange" onclick="sendDesktopAIQuick('帮我估算养猫预算')">💰 预算估算</button><button class="desktop-quick-btn qb-green" onclick="sendDesktopAIQuick('推荐适合新手的猫粮')">🍖 猫粮推荐</button><button class="desktop-quick-btn qb-blue" onclick="sendDesktopAIQuick('猫咪疫苗时间表')">💉 疫苗时间</button><button class="desktop-quick-btn qb-red" onclick="sendDesktopAIQuick('猫癣怎么处理')">🔴 猫癣处理</button></div></div>`;
   document.getElementById("d-ai-messages").innerHTML = `<div class="desktop-ai-msg-row fade-in"><div class="desktop-ai-msg-avatar">🐱</div><div class="ai-bubble-d bot">${welcome}</div></div>`;
   updateModeUI();
+
+  // ======= 最后再次确认：将最终名字应用到 DOM，防止被内部渲染覆盖 =======
+  const finalName = currentUserProfile.nickname;
+  if (document.getElementById("m-profile-name")) document.getElementById("m-profile-name").innerText = finalName;
+  if (document.getElementById("d-profile-name")) document.getElementById("d-profile-name").innerText = finalName;
+  // =======================================================
 }
 init();
 document.querySelectorAll("#app-mobile .nav-item[data-screen]").forEach(item => {
