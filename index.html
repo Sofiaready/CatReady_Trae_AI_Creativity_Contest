@@ -231,8 +231,9 @@ body {
   }
   .simple-video-card {
     background: var(--card-bg); border-radius: 12px; overflow: hidden;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border); cursor: pointer; transition: all 0.2s;
   }
+  .simple-video-card:active { transform: scale(0.97); }
   .simple-video-cover {
     aspect-ratio: 3/4; background: linear-gradient(135deg, var(--primary-light) 0%, var(--bg) 100%);
     display: flex; align-items: center; justify-content: center; font-size: 48px;
@@ -443,6 +444,8 @@ body {
     color: white; font-size: 10px; padding: 1px 6px; border-radius: 4px;
   }
   .profile-stats-m { display: flex; justify-content: space-around; text-align: center; position: relative; z-index: 1; }
+  .profile-stat-m { cursor: pointer; transition: all 0.2s; padding: 4px; border-radius: 8px; }
+  .profile-stat-m:active { transform: scale(0.95); opacity: 0.8; }
   .profile-stat-m .num { font-size: 18px; font-weight: 700; }
   .profile-stat-m .label { font-size: 12px; opacity: 0.9; margin-top: 2px; }
   .profile-actions {
@@ -707,7 +710,9 @@ body {
   }
   .work-item {
     background: var(--card-bg); border-radius: 12px; overflow: hidden; border: 1px solid var(--border);
+    cursor: pointer; transition: all 0.2s;
   }
+  .work-item:active { transform: scale(0.97); }
   .work-img {
     aspect-ratio: 1; background: var(--primary-light);
     display: flex; align-items: center; justify-content: center; font-size: 36px;
@@ -1291,7 +1296,14 @@ body {
   .desktop-profile-stat {
     background: var(--card-bg); border-radius: 12px; padding: 20px;
     text-align: center; border: 1px solid var(--border);
+    cursor: pointer; transition: all 0.2s;
   }
+  .desktop-profile-stat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-color: var(--primary-light);
+  }
+  .desktop-profile-stat:active { transform: scale(0.98); }
   .desktop-profile-stat .num { font-size: 24px; font-weight: 700; color: var(--primary); }
   .desktop-profile-stat .label { font-size: 13px; color: var(--text-light); margin-top: 4px; }
   .desktop-profile-menu {
@@ -2166,7 +2178,8 @@ body {
   width: 90%;
   max-width: 480px;
   max-height: 80vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   animation: slideUp 0.3s ease;
 }
 @keyframes slideUp {
@@ -2204,6 +2217,9 @@ body {
 }
 .edit-profile-body {
   padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 .edit-profile-form {
   display: flex;
@@ -2286,17 +2302,17 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(255,140,66,0.4);
 }
-.edit-profile-modal::-webkit-scrollbar {
+.edit-profile-body::-webkit-scrollbar {
   width: 6px;
 }
-.edit-profile-modal::-webkit-scrollbar-track {
+.edit-profile-body::-webkit-scrollbar-track {
   background: transparent;
 }
-.edit-profile-modal::-webkit-scrollbar-thumb {
+.edit-profile-body::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 3px;
 }
-.edit-profile-modal::-webkit-scrollbar-thumb:hover {
+.edit-profile-body::-webkit-scrollbar-thumb:hover {
   background: var(--text-light);
 }
 
@@ -2320,16 +2336,17 @@ body {
   width: 90%;
   max-width: 420px;
   max-height: 70vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   animation: slideUp 0.3s ease;
 }
-.view-profile-modal::-webkit-scrollbar {
+.view-profile-body::-webkit-scrollbar {
   width: 6px;
 }
-.view-profile-modal::-webkit-scrollbar-track {
+.view-profile-body::-webkit-scrollbar-track {
   background: transparent;
 }
-.view-profile-modal::-webkit-scrollbar-thumb {
+.view-profile-body::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 3px;
 }
@@ -2381,6 +2398,9 @@ body {
 }
 .view-profile-body {
   padding: 20px 24px;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 .view-profile-info {
   display: flex;
@@ -2454,6 +2474,398 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(255,140,66,0.4);
 }
+
+/* ========== 列表弹窗样式（关注/粉丝/猫咪/获赞） ========== */
+.list-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+@media (min-width: 768px) {
+  .list-modal-overlay {
+    align-items: center;
+  }
+}
+.list-modal {
+  background: var(--card-bg);
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 520px;
+  max-height: 75vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease;
+}
+@media (min-width: 768px) {
+  .list-modal {
+    border-radius: 20px;
+    max-height: 70vh;
+  }
+}
+.list-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.list-modal-title {
+  font-size: 17px;
+  font-weight: 700;
+}
+.list-modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bg);
+  font-size: 20px;
+  color: var(--text-light);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.list-modal-close:hover {
+  background: var(--border);
+  color: var(--text);
+}
+.list-modal-body {
+  padding: 12px 16px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+.list-modal-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.list-modal-item:hover {
+  background: var(--bg);
+}
+.list-modal-item:active {
+  transform: scale(0.98);
+}
+.list-modal-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-light), #FFF5EE);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.list-modal-info {
+  flex: 1;
+  min-width: 0;
+}
+.list-modal-name {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.list-modal-desc {
+  font-size: 12px;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+.list-modal-btn {
+  padding: 6px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--text);
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.list-modal-btn:hover {
+  background: var(--border);
+}
+.list-modal-btn.followed {
+  background: var(--bg);
+  color: var(--text-light);
+  border-color: var(--border);
+}
+
+/* ========== 视频/作品详情弹窗样式 ========== */
+.video-detail-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+.video-detail-modal {
+  background: var(--card-bg);
+  border-radius: 20px;
+  width: 92%;
+  max-width: 440px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease;
+  overflow: hidden;
+}
+.video-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.video-detail-back {
+  width: 34px; height: 34px;
+  border-radius: 50%; border: none;
+  background: var(--bg);
+  font-size: 18px; color: var(--text);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.video-detail-back:hover { background: var(--border); }
+.video-detail-author {
+  display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;
+}
+.video-detail-author-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-light), #FFF5EE);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.video-detail-author-name {
+  font-size: 14px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.video-detail-body {
+  flex: 1; overflow-y: auto; min-height: 0;
+}
+.video-detail-cover {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: linear-gradient(135deg, var(--primary-light) 0%, #FFF5EE 50%, var(--bg) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 80px;
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.video-detail-cover .play-icon {
+  position: absolute;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.45);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  transition: all 0.2s;
+  backdrop-filter: blur(4px);
+}
+.video-detail-cover:hover .play-icon {
+  transform: scale(1.1);
+  background: rgba(0,0,0,0.6);
+}
+.video-detail-cover.playing .play-icon {
+  opacity: 0;
+  pointer-events: none;
+}
+.video-detail-content {
+  padding: 16px;
+}
+.video-detail-text {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+.video-detail-music {
+  font-size: 13px;
+  color: var(--text-light);
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 4px;
+}
+.video-detail-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.video-detail-action-btn {
+  display: flex; align-items: center; gap: 4px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  color: var(--text);
+  transition: all 0.2s;
+}
+.video-detail-action-btn:hover { background: var(--border); }
+.video-detail-action-btn.liked {
+  background: #FFF0F0;
+  border-color: var(--red);
+  color: var(--red);
+}
+.video-detail-action-btn.faved {
+  background: #FFF5EE;
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.video-detail-action-btn .action-anim {
+  display: inline-block;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.video-detail-action-btn .action-anim.pop {
+  transform: scale(1.4);
+}
+.video-detail-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0 16px;
+}
+.video-detail-comments-title {
+  padding: 12px 16px 8px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.video-detail-comment {
+  display: flex; gap: 10px;
+  padding: 10px 16px;
+}
+.video-detail-comment-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+.video-detail-comment-body { flex: 1; min-width: 0; }
+.video-detail-comment-name {
+  font-size: 13px; font-weight: 600;
+}
+.video-detail-comment-text {
+  font-size: 14px; line-height: 1.5;
+  margin-top: 2px;
+}
+.video-detail-comment-time {
+  font-size: 11px; color: var(--text-light);
+  margin-top: 4px;
+}
+.video-detail-footer {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 8px;
+  flex-shrink: 0;
+}
+.video-detail-input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  font-size: 14px; font-family: inherit;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.video-detail-input:focus { border-color: var(--primary); }
+.video-detail-input::placeholder { color: var(--text-light); }
+.video-detail-send-btn {
+  padding: 10px 18px;
+  border-radius: 20px;
+  border: none;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.video-detail-send-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255,140,66,0.3);
+}
+.video-detail-send-btn:active { transform: scale(0.95); }
+.video-detail-body::-webkit-scrollbar { width: 4px; }
+.video-detail-body::-webkit-scrollbar-track { background: transparent; }
+.video-detail-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ========== 全屏作品播放器（抖音风格） ========== */
+.video-player-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #000;
+  z-index: 1300;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease;
+}
+.video-player-overlay .video-feed {
+  height: 100vh;
+  overflow: hidden;
+}
+.video-player-overlay .video-slide {
+  height: 100vh;
+  cursor: default;
+}
+.video-player-close {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.4);
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 1301;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  transition: all 0.2s;
+}
+.video-player-close:hover { background: rgba(0,0,0,0.6); }
+.video-player-detail-btn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: none;
+  background: rgba(0,0,0,0.4);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 1301;
+  backdrop-filter: blur(4px);
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.video-player-detail-btn:hover { background: rgba(0,0,0,0.6); }
 
 /* 功能入口卡片样式 */
 .quick-entry-card {
@@ -2829,10 +3241,10 @@ body {
         </div>
       </div>
       <div class="profile-stats-m">
-        <div class="profile-stat-m"><div class="num">89</div><div class="label">获赞</div></div>
-        <div class="profile-stat-m"><div class="num">328</div><div class="label">粉丝</div></div>
-        <div class="profile-stat-m"><div class="num">156</div><div class="label">关注</div></div>
-        <div class="profile-stat-m"><div class="num" id="m-cat-count">3</div><div class="label">猫咪</div></div>
+        <div class="profile-stat-m" onclick="showFollowList()"><div class="num">156</div><div class="label">关注</div></div>
+        <div class="profile-stat-m" onclick="showFollowerList()"><div class="num">328</div><div class="label">粉丝</div></div>
+        <div class="profile-stat-m" onclick="showCatList()"><div class="num" id="m-cat-count">3</div><div class="label">猫咪</div></div>
+        <div class="profile-stat-m" onclick="showLikesModal()"><div class="num">89</div><div class="label">获赞与收藏</div></div>
       </div>
     </div>
     <div class="profile-actions">
@@ -3111,10 +3523,10 @@ body {
         <button style="display:flex;align-items:center;gap:6px;padding:10px 20px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(255,140,66,0.3);transition:transform 0.2s,box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 16px rgba(255,140,66,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 12px rgba(255,140,66,0.3)'" onclick="showEditProfileModal()">✏️ 编辑资料</button>
       </div>
       <div class="desktop-profile-stats">
-        <div class="desktop-profile-stat"><div class="num">89</div><div class="label">获赞</div></div>
-        <div class="desktop-profile-stat"><div class="num">328</div><div class="label">粉丝</div></div>
-        <div class="desktop-profile-stat"><div class="num">156</div><div class="label">关注</div></div>
-        <div class="desktop-profile-stat"><div class="num" id="d-cat-count">3</div><div class="label">猫咪</div></div>
+        <div class="desktop-profile-stat" onclick="showFollowList()"><div class="num">156</div><div class="label">关注</div></div>
+        <div class="desktop-profile-stat" onclick="showFollowerList()"><div class="num">328</div><div class="label">粉丝</div></div>
+        <div class="desktop-profile-stat" onclick="showCatList()"><div class="num" id="d-cat-count">3</div><div class="label">猫咪</div></div>
+        <div class="desktop-profile-stat" onclick="showLikesModal()"><div class="num">89</div><div class="label">获赞与收藏</div></div>
       </div>
       <div class="desktop-profile-tabs">
         <div class="desktop-profile-tab active" data-dptab="works" onclick="switchDesktopProfileTab('works')">作品</div>
@@ -3703,7 +4115,7 @@ function renderMobileHome(tab) {
     let html = '<div class="video-feed" id="video-feed">';
     videoFeedData.forEach((v, i) => {
       const offset = (i - currentVideoIndex) * 100;
-      html += `<div class="video-slide" id="video-slide-${i}" style="transform:translateY(${offset}%)"><div class="video-bg-emoji">${v.emoji}</div><div class="video-slide-content"><div class="video-author"><div class="video-author-avatar-wrap"><div class="video-author-avatar">${v.avatar}</div><div class="video-follow-btn" onclick="handleVideoFollow(this)">➕</div></div><div class="video-author-name">@${v.author}</div></div><div class="video-text">${v.text}</div><div class="video-music">🎵 ${v.music}</div></div><div class="video-actions"><div class="video-action-item" onclick="handleVideoLike(this,${v.likes})"><div class="action-icon">❤️</div><div class="action-count" id="like-count-${i}">${v.likes}</div></div><div class="video-action-item"><div class="action-icon">💬</div><div class="action-count">${v.comments}</div></div><div class="video-action-item"><div class="action-icon">⭐</div><div class="action-count">${v.favorites}</div></div><div class="video-action-item"><div class="action-icon">📤</div><div class="action-count">${v.shares}</div></div></div></div>`;
+      html += `<div class="video-slide" id="video-slide-${i}" style="transform:translateY(${offset}%)" onclick="openVideoDetail(${v.id})"><div class="video-bg-emoji">${v.emoji}</div><div class="video-slide-content"><div class="video-author"><div class="video-author-avatar-wrap"><div class="video-author-avatar">${v.avatar}</div><div class="video-follow-btn" onclick="event.stopPropagation();handleVideoFollow(this)">➕</div></div><div class="video-author-name">@${v.author}</div></div><div class="video-text">${v.text}</div><div class="video-music">🎵 ${v.music}</div></div><div class="video-actions" onclick="event.stopPropagation()"><div class="video-action-item" onclick="handleVideoLike(this,${v.likes})"><div class="action-icon">❤️</div><div class="action-count" id="like-count-${i}">${v.likes}</div></div><div class="video-action-item"><div class="action-icon">💬</div><div class="action-count">${v.comments}</div></div><div class="video-action-item"><div class="action-icon">⭐</div><div class="action-count">${v.favorites}</div></div><div class="video-action-item"><div class="action-icon">📤</div><div class="action-count">${v.shares}</div></div></div></div>`;
     });
     html += "</div>";
     container.innerHTML = html;
@@ -3723,11 +4135,11 @@ function renderMobileHome(tab) {
       }
     }, 0);
   } else if (tab === "nearby") {
-    container.innerHTML = '<div class="simple-card-grid">' + videoFeedData.slice(0, 4).map(v => `<div class="simple-video-card"><div class="simple-video-cover">${v.emoji}</div><div class="simple-video-info"><div class="simple-video-title">${v.text.substring(0,30)}...</div><div class="simple-video-meta">📍 ${["北京","上海","广州","深圳"][Math.floor(Math.random()*4)]} · ${v.likes}赞</div></div></div>`).join("") + "</div>";
+    container.innerHTML = '<div class="simple-card-grid">' + videoFeedData.slice(0, 4).map(v => `<div class="simple-video-card" onclick="openVideoDetail(${v.id})"><div class="simple-video-cover">${v.emoji}</div><div class="simple-video-info"><div class="simple-video-title">${v.text.substring(0,30)}...</div><div class="simple-video-meta">📍 ${["北京","上海","广州","深圳"][Math.floor(Math.random()*4)]} · ${v.likes}赞</div></div></div>`).join("") + "</div>";
   } else if (tab === "hot") {
     container.innerHTML = '<div class="hot-rank-list">' + hotList.map(h => `<div class="hot-rank-item"><div class="hot-rank-num ${h.rank<=3?"top":""}">${h.rank}</div><div class="hot-rank-content"><div class="hot-rank-title">${h.title}</div><div class="hot-rank-heat">${h.heat}</div></div></div>`).join("") + "</div>";
   } else if (tab === "shop") {
-    container.innerHTML = `<div style="padding:12px 16px;font-size:15px;font-weight:700;">🏪 附近门店</div><div class="simple-card-grid">` + shops.map(s => `<div class="simple-video-card"><div class="simple-video-cover" style="font-size:48px;background:var(--primary-light);">${s.icon}</div><div class="simple-video-info"><div class="simple-video-title">${s.name}</div><div class="simple-video-meta">📍 ${s.address}</div><div class="simple-video-meta">⭐ ${s.rating} · ${s.members}</div></div></div>`).join('') + `</div><div style="padding:12px 16px;font-size:15px;font-weight:700;margin-top:8px;">🏠 领养专区</div><div class="simple-card-grid">` + [{icon:'🏠',name:'XX流浪猫救助站',address:'北京市朝阳区',rating:4.9,members:'2.3万粉丝'},{icon:'🐱',name:'爱心领养中心',address:'上海市浦东新区',rating:4.8,members:'1.8万粉丝'}].map(s => `<div class="simple-video-card"><div class="simple-video-cover" style="font-size:48px;background:var(--primary-light);">${s.icon}</div><div class="simple-video-info"><div class="simple-video-title">${s.name}</div><div class="simple-video-meta">📍 ${s.address}</div><div class="simple-video-meta">⭐ ${s.rating} · ${s.members}</div></div></div>`).join('') + `</div><div style="padding:12px 16px;font-size:15px;font-weight:700;margin-top:8px;">🎬 官方视频</div><div class="simple-card-grid">` + videoFeedData.slice(0,4).map(v => `<div class="simple-video-card"><div class="simple-video-cover">${v.emoji}</div><div class="simple-video-info"><div class="simple-video-title">${v.text.substring(0,30)}...</div><div class="simple-video-meta">❤️ ${v.likes}赞 · 💬 ${v.comments}评论</div></div></div>`).join('') + `</div>`;
+    container.innerHTML = `<div style="padding:12px 16px;font-size:15px;font-weight:700;">🏪 附近门店</div><div class="simple-card-grid">` + shops.map(s => `<div class="simple-video-card"><div class="simple-video-cover" style="font-size:48px;background:var(--primary-light);">${s.icon}</div><div class="simple-video-info"><div class="simple-video-title">${s.name}</div><div class="simple-video-meta">📍 ${s.address}</div><div class="simple-video-meta">⭐ ${s.rating} · ${s.members}</div></div></div>`).join('') + `</div><div style="padding:12px 16px;font-size:15px;font-weight:700;margin-top:8px;">🏠 领养专区</div><div class="simple-card-grid">` + [{icon:'🏠',name:'XX流浪猫救助站',address:'北京市朝阳区',rating:4.9,members:'2.3万粉丝'},{icon:'🐱',name:'爱心领养中心',address:'上海市浦东新区',rating:4.8,members:'1.8万粉丝'}].map(s => `<div class="simple-video-card"><div class="simple-video-cover" style="font-size:48px;background:var(--primary-light);">${s.icon}</div><div class="simple-video-info"><div class="simple-video-title">${s.name}</div><div class="simple-video-meta">📍 ${s.address}</div><div class="simple-video-meta">⭐ ${s.rating} · ${s.members}</div></div></div>`).join('') + `</div><div style="padding:12px 16px;font-size:15px;font-weight:700;margin-top:8px;">🎬 官方视频</div><div class="simple-card-grid">` + videoFeedData.slice(0,4).map(v => `<div class="simple-video-card" onclick="openVideoDetail(${v.id})"><div class="simple-video-cover">${v.emoji}</div><div class="simple-video-info"><div class="simple-video-title">${v.text.substring(0,30)}...</div><div class="simple-video-meta">❤️ ${v.likes}赞 · 💬 ${v.comments}评论</div></div></div>`).join('') + `</div>`;
   } else if (tab === "mall") {
     container.innerHTML = renderMobileMall();
   }
@@ -3968,7 +4380,7 @@ function renderMobileMessages() {
 function renderMobileProfile() {
   const container = document.getElementById("m-profile-content");
   if (currentProfileTab === "works") {
-    container.innerHTML = '<div class="works-waterfall">' + videoFeedData.slice(0, 6).map(v => `<div class="work-item"><div class="work-img">${v.emoji}</div><div class="work-info"><div class="work-title">${v.text.substring(0,20)}...</div><div class="work-stats">❤️ ${v.likes} · 💬 ${v.comments}</div></div></div>`).join("") + "</div>";
+    container.innerHTML = '<div class="works-waterfall">' + videoFeedData.slice(0, 6).map(v => `<div class="work-item" onclick="openVideoPlayer(${v.id})"><div class="work-img">${v.emoji}</div><div class="work-info"><div class="work-title">${v.text.substring(0,20)}...</div><div class="work-stats">❤️ ${v.likes} · 💬 ${v.comments}</div></div></div>`).join("") + "</div>";
   } else if (currentProfileTab === "cats") {
     container.innerHTML = renderMobileCatProfile();
   } else if (currentProfileTab === "ledger") {
@@ -3982,7 +4394,7 @@ function renderMobileProfile() {
   } else if (currentProfileTab === "groups") {
     container.innerHTML = '<div class="group-list" style="padding-top:8px;">' + contacts.groups.map(g => `<div class="group-list-item"><div class="group-list-avatar">${g.avatar}</div><div class="group-list-info"><h4>${g.name}</h4><div class="group-list-meta">${g.desc}</div></div></div>`).join("") + "</div>";
   } else if (currentProfileTab === "fav") {
-    container.innerHTML = `<div style="padding:12px 16px;font-size:15px;font-weight:700;">收藏夹</div><div class="works-waterfall">${videoFeedData.slice(0,4).map(v=>`<div class="work-item"><div class="work-img">${v.emoji}</div><div class="work-info"><div class="work-title">${v.text.substring(0,20)}...</div><div class="work-stats">⭐ 收藏</div></div></div>`).join("")}</div>`;
+    container.innerHTML = `<div style="padding:12px 16px;font-size:15px;font-weight:700;">收藏夹</div><div class="works-waterfall">${videoFeedData.slice(0,4).map(v=>`<div class="work-item" onclick="openVideoDetail(${v.id})"><div class="work-img">${v.emoji}</div><div class="work-info"><div class="work-title">${v.text.substring(0,20)}...</div><div class="work-stats">⭐ 收藏</div></div></div>`).join("")}</div>`;
   }
 }
 function renderDesktopLedger() {
@@ -4081,8 +4493,8 @@ function confirmModeSwitch() {
 }
 function switchUserMode(mode) {
   ledgerMode = mode;
-  // 如果用户没有在 localStorage 中自定义过名字，才根据新角色赋予对应默认名
-  if (!localStorage.getItem("custom_user_name")) {
+  // 如果用户没有在 localStorage 中自定义过资料，才根据新角色赋予对应默认名
+  if (!localStorage.getItem("custom_user_profile")) {
     const defaultName = mode === 'owner' ? DEFAULT_APP_CONFIG.OWNER_DEFAULT_NAME : DEFAULT_APP_CONFIG.PICKER_DEFAULT_NAME;
     currentUserProfile.nickname = defaultName;
   }
@@ -4235,18 +4647,448 @@ function saveProfileChanges() {
   
   currentUserProfile = { nickname, bio, location, wechat, qq, birthday };
 
-  // 新增：将新名字持久化保存到本地
-  localStorage.setItem("custom_user_name", nickname);
+  // 将完整资料持久化保存到本地
+  localStorage.setItem("custom_user_profile", JSON.stringify(currentUserProfile));
 
   const dProfileName = document.getElementById('d-profile-name');
-  if (dProfileName) dProfileName.textContent = ledgerMode === 'owner' ? nickname : '准' + nickname;
+  if (dProfileName) dProfileName.textContent = nickname;
 
   const mProfileName = document.getElementById('m-profile-name');
-  if (mProfileName) mProfileName.textContent = ledgerMode === 'owner' ? nickname : '准' + nickname;
+  if (mProfileName) mProfileName.textContent = nickname;
 
   closeEditProfileModal();
   showToast('✅ 资料修改成功');
 }
+
+// ========== 关注/粉丝/猫咪列表 & 获赞弹窗数据 ==========
+const followListData = [
+  { avatar: "😺", name: "喵星人日记", desc: "粉丝 · 养猫3年", followed: true },
+  { avatar: "🧶", name: "布偶猫小雪", desc: "粉丝 · 布偶控", followed: true },
+  { avatar: "🥣", name: "猫咪营养师", desc: "关注 · 宠物营养师", followed: true },
+  { avatar: "🏥", name: "兽医老王", desc: "关注 · 执业兽医", followed: true },
+  { avatar: "🐈", name: "橘猫大壮", desc: "粉丝 · 橘猫日常", followed: true },
+  { avatar: "☕", name: "猫咖探店达人", desc: "关注 · 探店博主", followed: true },
+  { avatar: "📖", name: "猫咪百科", desc: "关注 · 知识科普", followed: true },
+  { avatar: "🎯", name: "行为训练师", desc: "关注 · 正向训练", followed: true },
+];
+const followerListData = [
+  { avatar: "🐱", name: "小白铲屎官", desc: "新粉丝 · 刚刚关注了你" },
+  { avatar: "😸", name: "喵喵爱好者", desc: "粉丝 · 已关注你2天" },
+  { avatar: "🐾", name: "猫爪控", desc: "粉丝 · 已关注你5天" },
+  { avatar: "🏠", name: "多猫家庭", desc: "粉丝 · 已关注你1周" },
+  { avatar: "💉", name: "宠物医生李", desc: "关注 · 已关注你10天" },
+  { avatar: "🎪", name: "训猫达人", desc: "粉丝 · 已关注你2周" },
+  { avatar: "🧵", name: "手工猫窝", desc: "粉丝 · 已关注你1个月" },
+  { avatar: "🐟", name: "鲜食主义者", desc: "粉丝 · 已关注你1个月" },
+  { avatar: "📸", name: "猫咪摄影师", desc: "关注 · 已关注你2个月" },
+  { avatar: "🎨", name: "猫插画师", desc: "粉丝 · 已关注你3个月" },
+];
+const likesStatsData = {
+  totalLikes: 1245,
+  totalFavorites: 378,
+  totalShares: 89,
+  todayLikes: 23,
+  weekLikes: 156,
+  monthLikes: 678,
+  topPosts: [
+    { title: "我家主子今天第一次学会握手！", likes: 456, emoji: "🐱" },
+    { title: "橘猫日常：不是在吃就是在去吃的路上", likes: 345, emoji: "🐟" },
+    { title: "布偶猫的毛发护理日常", likes: 234, emoji: "🧶" },
+    { title: "猫咪呕吐怎么办？教你三步判断", likes: 210, emoji: "🏥" },
+  ]
+};
+
+function showFollowList() {
+  const overlay = document.createElement('div');
+  overlay.className = 'list-modal-overlay';
+  overlay.id = 'list-modal-overlay';
+  const listHtml = followListData.map((item, i) => `
+    <div class="list-modal-item">
+      <div class="list-modal-avatar">${item.avatar}</div>
+      <div class="list-modal-info">
+        <div class="list-modal-name">${item.name}</div>
+        <div class="list-modal-desc">${item.desc}</div>
+      </div>
+      <button class="list-modal-btn followed" onclick="toggleFollow(this, ${i})">已关注</button>
+    </div>
+  `).join('');
+  overlay.innerHTML = `
+    <div class="list-modal">
+      <div class="list-modal-header">
+        <div class="list-modal-title">关注 (${followListData.length})</div>
+        <button class="list-modal-close" onclick="closeListModal()">×</button>
+      </div>
+      <div class="list-modal-body">${listHtml}</div>
+    </div>
+  `;
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeListModal(); });
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+}
+function showFollowerList() {
+  const overlay = document.createElement('div');
+  overlay.className = 'list-modal-overlay';
+  overlay.id = 'list-modal-overlay';
+  const listHtml = followerListData.map((item, i) => `
+    <div class="list-modal-item">
+      <div class="list-modal-avatar">${item.avatar}</div>
+      <div class="list-modal-info">
+        <div class="list-modal-name">${item.name}</div>
+        <div class="list-modal-desc">${item.desc}</div>
+      </div>
+      <button class="list-modal-btn" onclick="toggleFollow(this, ${i})">回关</button>
+    </div>
+  `).join('');
+  overlay.innerHTML = `
+    <div class="list-modal">
+      <div class="list-modal-header">
+        <div class="list-modal-title">粉丝 (${followerListData.length})</div>
+        <button class="list-modal-close" onclick="closeListModal()">×</button>
+      </div>
+      <div class="list-modal-body">${listHtml}</div>
+    </div>
+  `;
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeListModal(); });
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+}
+function showCatList() {
+  const overlay = document.createElement('div');
+  overlay.className = 'list-modal-overlay';
+  overlay.id = 'list-modal-overlay';
+  const listHtml = catProfiles.map(cat => `
+    <div class="list-modal-item" onclick="showCatDetail('${cat.id}')">
+      <div class="list-modal-avatar" style="font-size:28px;">${cat.avatar || '🐱'}</div>
+      <div class="list-modal-info">
+        <div class="list-modal-name">${cat.name}</div>
+        <div class="list-modal-desc">${cat.breed} · ${cat.age}</div>
+      </div>
+      <div style="font-size:20px;color:var(--text-light);">›</div>
+    </div>
+  `).join('');
+  overlay.innerHTML = `
+    <div class="list-modal">
+      <div class="list-modal-header">
+        <div class="list-modal-title">猫咪 (${catProfiles.length})</div>
+        <button class="list-modal-close" onclick="closeListModal()">×</button>
+      </div>
+      <div class="list-modal-body">${listHtml}</div>
+    </div>
+  `;
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeListModal(); });
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+}
+function showLikesModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'list-modal-overlay';
+  overlay.id = 'list-modal-overlay';
+  const stats = likesStatsData;
+  overlay.innerHTML = `
+    <div class="list-modal" style="max-width:420px;">
+      <div class="list-modal-header">
+        <div class="list-modal-title">获赞与收藏</div>
+        <button class="list-modal-close" onclick="closeListModal()">×</button>
+      </div>
+      <div class="list-modal-body">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+          <div style="text-align:center;padding:14px;background:var(--bg);border-radius:12px;">
+            <div style="font-size:22px;font-weight:700;color:var(--primary);">${stats.totalLikes}</div>
+            <div style="font-size:12px;color:var(--text-light);margin-top:4px;">总获赞</div>
+          </div>
+          <div style="text-align:center;padding:14px;background:var(--bg);border-radius:12px;">
+            <div style="font-size:22px;font-weight:700;color:var(--primary);">${stats.totalFavorites}</div>
+            <div style="font-size:12px;color:var(--text-light);margin-top:4px;">总收藏</div>
+          </div>
+          <div style="text-align:center;padding:14px;background:var(--bg);border-radius:12px;">
+            <div style="font-size:22px;font-weight:700;color:var(--primary);">${stats.totalShares}</div>
+            <div style="font-size:12px;color:var(--text-light);margin-top:4px;">总分享</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <div style="flex:1;text-align:center;padding:10px;background:linear-gradient(135deg,var(--primary-light),#FFF5EE);border-radius:10px;">
+            <div style="font-size:18px;font-weight:700;color:var(--primary);">${stats.todayLikes}</div>
+            <div style="font-size:11px;color:var(--text-light);">今日获赞</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:10px;background:var(--bg);border-radius:10px;">
+            <div style="font-size:18px;font-weight:700;">${stats.weekLikes}</div>
+            <div style="font-size:11px;color:var(--text-light);">本周获赞</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:10px;background:var(--bg);border-radius:10px;">
+            <div style="font-size:18px;font-weight:700;">${stats.monthLikes}</div>
+            <div style="font-size:11px;color:var(--text-light);">本月获赞</div>
+          </div>
+        </div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:10px;">🔥 热门作品</div>
+        ${stats.topPosts.map(p => `
+          <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:10px;margin-bottom:8px;">
+            <div style="font-size:24px;">${p.emoji}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.title}</div>
+            </div>
+            <div style="font-size:13px;color:var(--primary);font-weight:600;">❤️ ${p.likes}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeListModal(); });
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+}
+function closeListModal() {
+  const overlay = document.getElementById('list-modal-overlay');
+  if (overlay) { overlay.remove(); document.body.style.overflow = ''; }
+}
+function toggleFollow(btn, index) {
+  if (btn.classList.contains('followed')) {
+    btn.classList.remove('followed');
+    btn.textContent = '关注';
+    btn.style.background = 'linear-gradient(135deg,var(--primary),var(--primary-dark))';
+    btn.style.color = 'white';
+  } else {
+    btn.classList.add('followed');
+    btn.textContent = '已关注';
+    btn.style.background = '';
+    btn.style.color = '';
+  }
+}
+
+// ========== 视频/作品详情弹窗逻辑 ==========
+let currentVideoDetail = null;
+let videoDetailLiked = {};
+let videoDetailFaved = {};
+let videoDetailComments = {};
+
+// 预设评论数据
+const defaultComments = [
+  { avatar: "😺", name: "喵星人日记", text: "太可爱了！😂", time: "2小时前" },
+  { avatar: "😸", name: "猫猫爱好者", text: "我家猫也是这样哈哈", time: "5小时前" },
+  { avatar: "🐾", name: "铲屎新手", text: "学到了！感谢分享~", time: "1天前" },
+];
+
+function openVideoDetail(id) {
+  const video = videoFeedData.find(v => v.id === id);
+  if (!video) return;
+  currentVideoDetail = video;
+
+  if (!videoDetailComments[id]) {
+    videoDetailComments[id] = [...defaultComments];
+  }
+  const comments = videoDetailComments[id];
+  const isLiked = !!videoDetailLiked[id];
+  const isFaved = !!videoDetailFaved[id];
+  const currentLikes = (videoDetailLiked[id] ? video.likes + 1 : video.likes);
+
+  const overlay = document.createElement('div');
+  overlay.className = 'video-detail-overlay';
+  overlay.id = 'video-detail-overlay';
+
+  const commentsHtml = comments.map(c => `
+    <div class="video-detail-comment">
+      <div class="video-detail-comment-avatar">${c.avatar}</div>
+      <div class="video-detail-comment-body">
+        <div class="video-detail-comment-name">${c.name}</div>
+        <div class="video-detail-comment-text">${c.text}</div>
+        <div class="video-detail-comment-time">${c.time}</div>
+      </div>
+    </div>
+  `).join('');
+
+  overlay.innerHTML = `
+    <div class="video-detail-modal">
+      <div class="video-detail-header">
+        <button class="video-detail-back" onclick="closeVideoDetail()">←</button>
+        <div class="video-detail-author">
+          <div class="video-detail-author-avatar">${video.avatar}</div>
+          <div class="video-detail-author-name">${video.author}</div>
+        </div>
+      </div>
+      <div class="video-detail-body">
+        <div class="video-detail-cover" id="vd-cover" onclick="togglePlay()">
+          ${video.emoji}
+          <div class="play-icon">▶️</div>
+        </div>
+        <div class="video-detail-content">
+          <div class="video-detail-text">${video.text}</div>
+          <div class="video-detail-music">🎵 ${video.music}</div>
+          <div class="video-detail-actions">
+            <button class="video-detail-action-btn ${isLiked ? 'liked' : ''}" id="vd-like-btn" onclick="toggleVideoLike(${id})">
+              <span class="action-anim" id="vd-like-icon">❤️</span>
+              <span id="vd-like-count">${currentLikes}</span>
+            </button>
+            <button class="video-detail-action-btn" onclick="document.getElementById('vd-comment-input').focus()">
+              💬 <span id="vd-comment-count">${comments.length}</span>
+            </button>
+            <button class="video-detail-action-btn ${isFaved ? 'faved' : ''}" id="vd-fav-btn" onclick="toggleVideoFav(${id})">
+              <span class="action-anim" id="vd-fav-icon">⭐</span>
+              <span id="vd-fav-count">${video.favorites}</span>
+            </button>
+            <button class="video-detail-action-btn" onclick="showToast('📤 分享链接已复制（Demo演示）')">
+              📤 ${video.shares}
+            </button>
+          </div>
+        </div>
+        <div class="video-detail-divider"></div>
+        <div class="video-detail-comments-title">评论 (${comments.length})</div>
+        <div id="vd-comments-list">${commentsHtml}</div>
+      </div>
+      <div class="video-detail-footer">
+        <input class="video-detail-input" id="vd-comment-input" placeholder="输入评论..." onkeydown="if(event.key==='Enter')sendVideoComment(${id})">
+        <button class="video-detail-send-btn" onclick="sendVideoComment(${id})">发送</button>
+      </div>
+    </div>
+  `;
+
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeVideoDetail(); });
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+}
+
+function closeVideoDetail() {
+  const overlay = document.getElementById('video-detail-overlay');
+  if (overlay) { overlay.remove(); document.body.style.overflow = ''; }
+  currentVideoDetail = null;
+}
+
+function togglePlay() {
+  const cover = document.getElementById('vd-cover');
+  if (cover) {
+    cover.classList.toggle('playing');
+    showToast(cover.classList.contains('playing') ? '▶️ 开始播放（Demo演示）' : '⏸️ 已暂停');
+  }
+}
+
+function toggleVideoLike(id) {
+  const video = videoFeedData.find(v => v.id === id);
+  if (!video) return;
+  videoDetailLiked[id] = !videoDetailLiked[id];
+  const isLiked = videoDetailLiked[id];
+  const likes = isLiked ? video.likes + 1 : video.likes;
+
+  const btn = document.getElementById('vd-like-btn');
+  const count = document.getElementById('vd-like-count');
+  const icon = document.getElementById('vd-like-icon');
+
+  if (btn) btn.className = 'video-detail-action-btn' + (isLiked ? ' liked' : '');
+  if (count) count.textContent = likes;
+
+  if (icon) {
+    icon.classList.add('pop');
+    setTimeout(() => icon.classList.remove('pop'), 300);
+  }
+}
+
+function toggleVideoFav(id) {
+  const video = videoFeedData.find(v => v.id === id);
+  if (!video) return;
+  videoDetailFaved[id] = !videoDetailFaved[id];
+  const isFaved = videoDetailFaved[id];
+
+  const btn = document.getElementById('vd-fav-btn');
+  const icon = document.getElementById('vd-fav-icon');
+
+  if (btn) btn.className = 'video-detail-action-btn' + (isFaved ? ' faved' : '');
+  if (icon) {
+    icon.classList.add('pop');
+    setTimeout(() => icon.classList.remove('pop'), 300);
+  }
+  showToast(isFaved ? '⭐ 已收藏' : '取消收藏');
+}
+
+function sendVideoComment(id) {
+  const input = document.getElementById('vd-comment-input');
+  const text = input ? input.value.trim() : '';
+  if (!text) { showToast('请输入评论内容'); return; }
+
+  if (!videoDetailComments[id]) videoDetailComments[id] = [];
+  videoDetailComments[id].unshift({
+    avatar: '😊', name: currentUserProfile.nickname, text: text, time: '刚刚'
+  });
+
+  const list = document.getElementById('vd-comments-list');
+  const commentHtml = `
+    <div class="video-detail-comment" style="animation:fadeIn 0.3s ease;">
+      <div class="video-detail-comment-avatar">😊</div>
+      <div class="video-detail-comment-body">
+        <div class="video-detail-comment-name">${currentUserProfile.nickname}</div>
+        <div class="video-detail-comment-text">${text}</div>
+        <div class="video-detail-comment-time">刚刚</div>
+      </div>
+    </div>
+  `;
+  if (list) list.insertAdjacentHTML('afterbegin', commentHtml);
+
+  const countEl = document.getElementById('vd-comment-count');
+  if (countEl) countEl.textContent = videoDetailComments[id].length;
+
+  input.value = '';
+  showToast('✅ 评论发送成功（Demo演示）');
+}
+
+// ========== 全屏作品播放器 ==========
+let videoPlayerIndex = 0;
+function openVideoPlayer(startId) {
+  const startIndex = videoFeedData.findIndex(v => v.id === startId);
+  videoPlayerIndex = startIndex >= 0 ? startIndex : 0;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'video-player-overlay';
+  overlay.id = 'video-player-overlay';
+
+  let html = '<button class="video-player-close" onclick="closeVideoPlayer()">←</button>';
+  html += '<button class="video-player-detail-btn" onclick="openVideoDetailFromPlayer()">详情</button>';
+  html += '<div class="video-feed" id="player-feed">';
+  videoFeedData.forEach((v, i) => {
+    const offset = (i - videoPlayerIndex) * 100;
+    html += `<div class="video-slide" id="player-slide-${i}" style="transform:translateY(${offset}%)"><div class="video-bg-emoji">${v.emoji}</div><div class="video-slide-content"><div class="video-author"><div class="video-author-avatar-wrap"><div class="video-author-avatar">${v.avatar}</div><div class="video-follow-btn" onclick="event.stopPropagation();handleVideoFollow(this)">➕</div></div><div class="video-author-name">@${v.author}</div></div><div class="video-text">${v.text}</div><div class="video-music">🎵 ${v.music}</div></div><div class="video-actions" onclick="event.stopPropagation()"><div class="video-action-item" onclick="handleVideoLike(this,${v.likes})"><div class="action-icon">❤️</div><div class="action-count">${v.likes}</div></div><div class="video-action-item"><div class="action-icon">💬</div><div class="action-count">${v.comments}</div></div><div class="video-action-item"><div class="action-icon">⭐</div><div class="action-count">${v.favorites}</div></div><div class="video-action-item"><div class="action-icon">📤</div><div class="action-count">${v.shares}</div></div></div></div>`;
+  });
+  html += '</div>';
+  overlay.innerHTML = html;
+
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+
+  setTimeout(() => {
+    const feed = document.getElementById('player-feed');
+    if (feed) {
+      feed.addEventListener('wheel', handlePlayerWheel, { passive: false });
+      let touchStartY = 0;
+      feed.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
+      feed.addEventListener('touchmove', e => {
+        const dy = e.touches[0].clientY - touchStartY;
+        if (Math.abs(dy) > 40) {
+          if (dy < 0 && videoPlayerIndex < videoFeedData.length - 1) { videoPlayerIndex++; updatePlayerSlides(); touchStartY = e.touches[0].clientY; }
+          else if (dy > 0 && videoPlayerIndex > 0) { videoPlayerIndex--; updatePlayerSlides(); touchStartY = e.touches[0].clientY; }
+        }
+      }, { passive: true });
+    }
+  }, 0);
+}
+
+function closeVideoPlayer() {
+  const overlay = document.getElementById('video-player-overlay');
+  if (overlay) { overlay.remove(); document.body.style.overflow = ''; }
+}
+
+function handlePlayerWheel(e) {
+  e.preventDefault();
+  if (e.deltaY > 30 && videoPlayerIndex < videoFeedData.length - 1) { videoPlayerIndex++; updatePlayerSlides(); }
+  else if (e.deltaY < -30 && videoPlayerIndex > 0) { videoPlayerIndex--; updatePlayerSlides(); }
+}
+
+function updatePlayerSlides() {
+  videoFeedData.forEach((v, i) => {
+    const slide = document.getElementById(`player-slide-${i}`);
+    if (slide) slide.style.transform = `translateY(${(i - videoPlayerIndex) * 100}%)`;
+  });
+}
+
+function openVideoDetailFromPlayer() {
+  const video = videoFeedData[videoPlayerIndex];
+  if (video) openVideoDetail(video.id);
+}
+
 function showViewProfileModal() {
   const overlay = document.createElement('div');
   overlay.className = 'view-profile-modal-overlay';
@@ -5030,7 +5872,7 @@ function switchDesktopProfileTab(tab) {
   const activeTab = document.querySelector(`.desktop-profile-tab[data-dptab="${tab}"]`);
   if (activeTab) activeTab.classList.add('active');
   if (tab === "works") {
-    container.innerHTML = '<div class="desktop-works-grid">' + videoFeedData.slice(0, 6).map(v => `<div class="desktop-work-item"><div class="desktop-work-img">${v.emoji}</div><div class="desktop-work-info"><div style="font-size:14px;font-weight:600;line-height:1.4;">${v.text.substring(0,30)}...</div><div style="font-size:12px;color:var(--text-light);margin-top:6px;">❤️ ${v.likes} · 💬 ${v.comments}</div></div></div>`).join("") + "</div>";
+    container.innerHTML = '<div class="desktop-works-grid">' + videoFeedData.slice(0, 6).map(v => `<div class="desktop-work-item" onclick="openVideoPlayer(${v.id})"><div class="desktop-work-img">${v.emoji}</div><div class="desktop-work-info"><div style="font-size:14px;font-weight:600;line-height:1.4;">${v.text.substring(0,30)}...</div><div style="font-size:12px;color:var(--text-light);margin-top:6px;">❤️ ${v.likes} · 💬 ${v.comments}</div></div></div>`).join("") + "</div>";
   } else if (tab === "cats") {
     container.innerHTML = renderDesktopCatProfile();
   } else if (tab === "ledger") {
@@ -5071,7 +5913,7 @@ function switchDesktopProfileTab(tab) {
   } else if (tab === "groups") {
     container.innerHTML = '<div class="desktop-card" style="padding:16px;">' + contacts.groups.map(g => `<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);"><div style="width:40px;height:40px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:18px;">${g.avatar}</div><div style="flex:1;"><div style="font-size:14px;font-weight:600;">${g.name}</div><div style="font-size:12px;color:var(--text-light);">${g.desc}</div></div></div>`).join("") + "</div>";
   } else if (tab === "fav") {
-    container.innerHTML = '<div class="desktop-works-grid">' + videoFeedData.slice(0, 6).map(v => `<div class="desktop-work-item"><div class="desktop-work-img">${v.emoji}</div><div class="desktop-work-info"><div style="font-size:14px;font-weight:600;line-height:1.4;">${v.text.substring(0,30)}...</div><div style="font-size:12px;color:var(--text-light);margin-top:6px;">⭐ 收藏</div></div></div>`).join("") + "</div>";
+    container.innerHTML = '<div class="desktop-works-grid">' + videoFeedData.slice(0, 6).map(v => `<div class="desktop-work-item" onclick="openVideoDetail(${v.id})"><div class="desktop-work-img">${v.emoji}</div><div class="desktop-work-info"><div style="font-size:14px;font-weight:600;line-height:1.4;">${v.text.substring(0,30)}...</div><div style="font-size:12px;color:var(--text-light);margin-top:6px;">⭐ 收藏</div></div></div>`).join("") + "</div>";
   }
 }
 function switchMobileScreen(screenName) {
@@ -5569,10 +6411,15 @@ function closeCatModal() {
 }
 
 function init() {
-  // 先读取 localStorage，仅同步到 currentUserProfile（供后续 updateModeUI 等渲染函数使用）
-  const savedName = localStorage.getItem("custom_user_name");
-  if (savedName) {
-    currentUserProfile.nickname = savedName;
+  // 先读取 localStorage，恢复完整用户资料
+  const savedProfile = localStorage.getItem("custom_user_profile");
+  if (savedProfile) {
+    try {
+      const parsed = JSON.parse(savedProfile);
+      currentUserProfile = { ...currentUserProfile, ...parsed };
+    } catch (e) {
+      currentUserProfile.nickname = DEFAULT_APP_CONFIG.OWNER_DEFAULT_NAME;
+    }
   } else {
     currentUserProfile.nickname = DEFAULT_APP_CONFIG.OWNER_DEFAULT_NAME;
   }
